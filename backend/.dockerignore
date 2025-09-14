@@ -1,0 +1,30 @@
+# .dockerignore file for backend
+**/bin/
+**/obj/
+**/TestResults/
+**/.vs/
+**/.vscode/
+**/.git/
+**/node_modules/
+**/*.user
+**/*.suo
+**/.env
+**/.DS_Store
+**/Thumbs.db
+
+# Test files
+**/*Tests.cs
+**/test.runsettings
+**/tests.runsettings
+**/MSTestSettings.cs
+
+# Documentation
+**/*.md
+
+# Logs
+**/*.log
+**/logs/
+
+# Temporary files
+**/tmp/
+**/temp/

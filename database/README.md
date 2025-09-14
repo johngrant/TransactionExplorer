@@ -14,7 +14,7 @@ The database consists of two main tables:
 - **CreatedAt/UpdatedAt**: Audit timestamps
 
 ### ExchangeRates
-- **Id**: Primary key (auto-increment) 
+- **Id**: Primary key (auto-increment)
 - **RecordDate**: Date the rate was recorded
 - **CountryCurrencyDesc**: Country and currency description
 - **ExchangeRate**: Exchange rate to USD
@@ -39,12 +39,17 @@ The database consists of two main tables:
 
 2. Start the SQL Server container:
    ```bash
-   docker compose -p transaction-explorer up -d
+   ./up.sh
    ```
 
 3. Wait for initialization to complete (check logs):
    ```bash
    docker compose -p transaction-explorer logs -f db-init
+   ```
+
+4. To stop the database:
+   ```bash
+   ./down.sh
    ```
 
 ### Connection Details

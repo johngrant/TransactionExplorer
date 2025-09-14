@@ -30,7 +30,7 @@ BEGIN
         ExchangeRate DECIMAL(19,6) NOT NULL,
         EffectiveDate DATE NOT NULL,
         CreatedAt DATETIME2 DEFAULT GETUTCDATE(),
-        
+
         -- Index for efficient lookups by currency and date
         INDEX IX_ExchangeRates_Currency_Date NONCLUSTERED (CountryCurrencyDesc, EffectiveDate DESC),
         INDEX IX_ExchangeRates_EffectiveDate NONCLUSTERED (EffectiveDate DESC)
@@ -48,7 +48,7 @@ IF NOT EXISTS (SELECT * FROM sys.views WHERE name='TransactionCurrencyView')
 BEGIN
     EXEC('
     CREATE VIEW TransactionCurrencyView AS
-    SELECT 
+    SELECT
         t.Id,
         t.Description,
         t.TransactionDate,
@@ -61,7 +61,7 @@ BEGIN
         ROUND(t.PurchaseAmount * er.ExchangeRate, 2) AS ConvertedAmount
     FROM Transactions t
     CROSS APPLY (
-        SELECT TOP 1 
+        SELECT TOP 1
             CountryCurrencyDesc,
             ExchangeRate,
             EffectiveDate

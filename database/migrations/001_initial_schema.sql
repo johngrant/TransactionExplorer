@@ -32,10 +32,10 @@ BEGIN
         [PurchaseAmount] decimal(19,2) NOT NULL,
         [CreatedAt] datetime2(7) NOT NULL DEFAULT (getutcdate()),
         [UpdatedAt] datetime2(7) NOT NULL DEFAULT (getutcdate()),
-        
+
         CONSTRAINT [CK_Transactions_PurchaseAmount] CHECK ([PurchaseAmount] > 0)
     );
-    
+
     PRINT 'Transactions table created.';
 END
 GO
@@ -51,14 +51,14 @@ BEGIN
         [EffectiveDate] date NOT NULL,
         [CreatedAt] datetime2(7) NOT NULL DEFAULT (getutcdate())
     );
-    
+
     -- Create indexes for efficient lookups
-    CREATE NONCLUSTERED INDEX [IX_ExchangeRates_Currency_Date] 
+    CREATE NONCLUSTERED INDEX [IX_ExchangeRates_Currency_Date]
     ON [dbo].[ExchangeRates] ([CountryCurrencyDesc], [EffectiveDate] DESC);
-    
-    CREATE NONCLUSTERED INDEX [IX_ExchangeRates_EffectiveDate] 
+
+    CREATE NONCLUSTERED INDEX [IX_ExchangeRates_EffectiveDate]
     ON [dbo].[ExchangeRates] ([EffectiveDate] DESC);
-    
+
     PRINT 'ExchangeRates table created with indexes.';
 END
 GO
@@ -73,14 +73,14 @@ BEGIN
     AS
     BEGIN
         SET NOCOUNT ON;
-        
+
         UPDATE t
         SET UpdatedAt = GETUTCDATE()
         FROM [dbo].[Transactions] t
         INNER JOIN inserted i ON t.Id = i.Id;
     END
     ');
-    
+
     PRINT 'Transactions UpdatedAt trigger created.';
 END
 GO

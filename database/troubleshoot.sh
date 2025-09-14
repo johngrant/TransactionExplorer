@@ -46,10 +46,10 @@ echo "------------------------------------"
 if docker ps | grep -q "transaction-explorer-sqlserver-1"; then
     echo "Attempting connection..."
     docker exec transaction-explorer-sqlserver-1 /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT @@VERSION, @@SERVERNAME" -h-1 -C
-    
+
     if [ $? -eq 0 ]; then
         echo "✅ Connection successful!"
-        
+
         echo ""
         echo "6. Database Status:"
         echo "------------------"

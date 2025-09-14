@@ -1,0 +1,38 @@
+version: "3.8"
+
+# Backend development version with hot reload and debugging support
+name: transaction-explorer
+
+services:
+  transaction-explorer-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build # Use build stage for development
+    container_name: transaction-explorer-api
+    ports:
+      - "5070:8080" # Match the port from launchSettings.json
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=transaction-explorer-db,1433;Database=TransactionExplorer;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true;
+    volumes:
+      - .:/src # Mount source code for hot reload
+    networks:
+      - transaction-explorer-network
+    restart: unless-stopped
+    command:
+      [
+        "dotnet",
+        "watch",
+        "run",
+        "--project",
+        "WebApi/WebApi.csproj",
+        "--urls",
+        "http://+:8080",
+      ]
+
+networks:
+  transaction-explorer-network:
+    name: transaction-explorer-network
+    driver: bridge

@@ -19,29 +19,29 @@ app.UseHttpsRedirection();
 // Map controllers
 app.MapControllers();
 
-var summaries = new[]
+// Add health check endpoint
+app.MapGet("/health", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    return Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+})
+.WithName("HealthCheck");
 
-// Default weather endpoint
+// Default API info endpoint
 app.MapGet("/", () =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return Results.Ok(new
+    {
+        message = "Transaction Explorer API is running",
+        service = "WebApi",
+        version = "1.0.0",
+        timestamp = DateTime.UtcNow,
+        endpoints = new
+        {
+            health = "/health",
+            transactions = "/api/transactions"
+        }
+    });
 })
-.WithName("GetWeatherForecast");
+.WithName("ApiInfo");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

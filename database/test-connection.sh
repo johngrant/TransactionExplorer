@@ -18,7 +18,7 @@ echo ""
 # Check if container is running
 if ! docker ps | grep -q "transaction-explorer-sqlserver-1\|transaction-explorer_sqlserver_1"; then
     echo "❌ Database container is not running."
-    echo "   Run './start-database.sh' first."
+    echo "   Run './up.sh' first."
     exit 1
 fi
 
