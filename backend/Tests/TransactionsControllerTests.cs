@@ -26,10 +26,10 @@ public class TransactionsControllerTests
     }
 
     [TestMethod]
-    public void GetAll_ReturnsEmptyList_WhenNoTransactions()
+    public async Task GetAll_ReturnsEmptyList_WhenNoTransactions()
     {
         // Act
-        var result = _controller.GetAll();
+        var result = await _controller.GetAllAsync();
 
         // Assert
         var okResult = result.Result as OkObjectResult;
@@ -41,7 +41,7 @@ public class TransactionsControllerTests
     }
 
     [TestMethod]
-    public void Create_ReturnsCreatedTransaction_WhenValidRequest()
+    public async Task Create_ReturnsCreatedTransaction_WhenValidRequest()
     {
         // Arrange
         var request = new CreateTransactionRequest
@@ -50,7 +50,7 @@ public class TransactionsControllerTests
         };
 
         // Act
-        var result = _controller.Create(request);
+        var result = await _controller.CreateAsync(request);
 
         // Assert
         var createdResult = result.Result as CreatedAtActionResult;
@@ -63,17 +63,17 @@ public class TransactionsControllerTests
     }
 
     [TestMethod]
-    public void Get_ReturnsNotFound_WhenTransactionDoesNotExist()
+    public async Task Get_ReturnsNotFound_WhenTransactionDoesNotExist()
     {
         // Act
-        var result = _controller.Get(999);
+        var result = await _controller.GetAsync(999);
 
         // Assert
         Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
     }
 
     [TestMethod]
-    public void Get_ReturnsTransaction_WhenTransactionExists()
+    public async Task Get_ReturnsTransaction_WhenTransactionExists()
     {
         // Arrange - Make sure we start with a clean state
         TransactionsController.ClearTransactions();
@@ -82,7 +82,7 @@ public class TransactionsControllerTests
         {
             Description = "Test transaction for retrieval"
         };
-        var createResult = _controller.Create(createRequest);
+        var createResult = await _controller.CreateAsync(createRequest);
         var createdAtResult = createResult.Result as CreatedAtActionResult;
         Assert.IsNotNull(createdAtResult, "Create should return CreatedAtActionResult");
 
@@ -90,7 +90,7 @@ public class TransactionsControllerTests
         Assert.IsNotNull(createdTransaction, "Created transaction should not be null");
 
         // Act
-        var result = _controller.Get(createdTransaction.Id);
+        var result = await _controller.GetAsync(createdTransaction.Id);
 
         // Assert
         var okResult = result.Result as OkObjectResult;

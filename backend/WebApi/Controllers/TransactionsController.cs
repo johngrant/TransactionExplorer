@@ -27,8 +27,10 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <returns>List of all transactions</returns>
     [HttpGet]
-    public ActionResult<IEnumerable<Transaction>> GetAll()
+    public async Task<ActionResult<IEnumerable<Transaction>>> GetAllAsync()
     {
+        // Simulate async operation
+        await Task.CompletedTask;
         return Ok(_transactions);
     }
 
@@ -38,8 +40,10 @@ public class TransactionsController : ControllerBase
     /// <param name="id">The transaction ID</param>
     /// <returns>The transaction if found</returns>
     [HttpGet("{id}")]
-    public ActionResult<Transaction> Get(int id)
+    public async Task<ActionResult<Transaction>> GetAsync(int id)
     {
+        // Simulate async operation
+        await Task.CompletedTask;
         var transaction = _transactions.FirstOrDefault(t => t.Id == id);
 
         if (transaction == null)
@@ -56,13 +60,15 @@ public class TransactionsController : ControllerBase
     /// <param name="request">The transaction creation request</param>
     /// <returns>The created transaction</returns>
     [HttpPost]
-    public ActionResult<Transaction> Create([FromBody] CreateTransactionRequest request)
+    public async Task<ActionResult<Transaction>> CreateAsync([FromBody] CreateTransactionRequest request)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
+        // Simulate async operation
+        await Task.CompletedTask;
         var transaction = new Transaction
         {
             Id = _nextId++,
@@ -71,6 +77,6 @@ public class TransactionsController : ControllerBase
 
         _transactions.Add(transaction);
 
-        return CreatedAtAction(nameof(Get), new { id = transaction.Id }, transaction);
+        return CreatedAtAction(nameof(GetAsync), new { id = transaction.Id }, transaction);
     }
 }
