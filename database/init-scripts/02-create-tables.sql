@@ -5,6 +5,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Transactions' AND xtype='U')
 BEGIN
     CREATE TABLE Transactions (
         Id INT IDENTITY(1,1) PRIMARY KEY,
+        CustomId NVARCHAR(100) NOT NULL UNIQUE,
         Description NVARCHAR(50) NOT NULL,
         TransactionDate DATE NOT NULL,
         PurchaseAmount DECIMAL(19,2) NOT NULL CHECK (PurchaseAmount > 0),

@@ -35,15 +35,26 @@ cd "$(dirname "$0")"
 
 # Stop and remove containers
 print_status "Stopping database containers..."
-if docker compose -p transaction-explorer down; then
-    print_success "Database containers stopped successfully ✓"
+print_status "Stopping db and db-init containers specifically..."
+
+# Stop the specific containers we want
+if docker compose -p transaction-explorer stop sqlserver db-init; then
+    print_success "Database and db-init containers stopped successfully ✓"
 else
     print_error "Failed to stop database containers"
     exit 1
 fi
 
+# Remove the stopped containers
+print_status "Removing stopped containers..."
+if docker compose -p transaction-explorer rm -f sqlserver db-init; then
+    print_success "Database containers removed successfully ✓"
+else
+    print_warning "Some containers may not have been removed properly"
+fi
+
 # Check if containers are stopped
-if ! docker compose -p transaction-explorer ps | grep -q "Up"; then
+if ! docker compose -p transaction-explorer ps sqlserver db-init | grep -q "Up"; then
     print_success "All database containers are stopped ✓"
     echo ""
     echo "🎉 Database shutdown completed successfully!"
@@ -51,5 +62,5 @@ if ! docker compose -p transaction-explorer ps | grep -q "Up"; then
     echo "To start again: ./up.sh"
 else
     print_warning "Some containers may still be running"
-    docker compose -p transaction-explorer ps
+    docker compose -p transaction-explorer ps sqlserver db-init
 fi
