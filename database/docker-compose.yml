@@ -1,0 +1,74 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=${MSSQL_PID}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./init-scripts:/usr/src/app
+    networks:
+      - transaction-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P '${SA_PASSWORD}' -Q 'SELECT 1' -C || exit 1"]
+      interval: 15s
+      retries: 12
+      start_period: 30s
+      timeout: 10s
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ./init-scripts:/scripts
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+    command: >
+      bash -c "
+        echo 'SQL Server health check passed, waiting additional time for full readiness...'
+        sleep 10
+        
+        echo 'Testing connection...'
+        until /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U SA -P '${SA_PASSWORD}' -Q 'SELECT @@VERSION' -C > /dev/null 2>&1; do
+          echo 'SQL Server still not ready, waiting 5 more seconds...'
+          sleep 5
+        done
+        
+        echo 'SQL Server is ready! Running database initialization scripts...'
+        
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U SA -P '${SA_PASSWORD}' -d master -i /scripts/01-create-database.sql -C
+        if [ $$? -ne 0 ]; then
+          echo 'Failed to create database'
+          exit 1
+        fi
+        
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U SA -P '${SA_PASSWORD}' -d TransactionExplorer -i /scripts/02-create-tables.sql -C
+        if [ $$? -ne 0 ]; then
+          echo 'Failed to create tables'
+          exit 1
+        fi
+        
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U SA -P '${SA_PASSWORD}' -d TransactionExplorer -i /scripts/03-seed-data.sql -C
+        if [ $$? -ne 0 ]; then
+          echo 'Failed to seed data'
+          exit 1
+        fi
+        
+        echo 'Database initialization completed successfully!'
+      "
+    networks:
+      - transaction-network
+    restart: "no"
+
+volumes:
+  sqlserver_data:
+
+networks:
+  transaction-network:
+    driver: bridge
