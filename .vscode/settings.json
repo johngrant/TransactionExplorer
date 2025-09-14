@@ -18,7 +18,8 @@
     "**/dist": true,
     "**/build": true,
     "**/bin": true,
-    "**/obj": true
+    "**/obj": true,
+    "**/TestResults": true
   },
   "search.exclude": {
     "**/node_modules": true,

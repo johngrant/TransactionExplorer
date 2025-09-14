@@ -441,8 +441,9 @@ public
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
+
+**/TestResults/**/*
 
 # Storybook build outputs
 storybook-static
