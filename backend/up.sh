@@ -54,10 +54,11 @@ fi
 # Deploy with Docker Compose
 print_status "Deploying with Docker Compose..."
 
-# Stop existing containers
-if docker compose -p transaction-explorer ps | grep -q "transaction-explorer"; then
-    print_status "Stopping existing containers..."
-    docker compose -p transaction-explorer down
+# Stop existing backend containers only
+if docker compose -p transaction-explorer ps | grep -q "transaction-explorer-backend"; then
+    print_status "Stopping existing backend containers..."
+    docker compose -p transaction-explorer stop transaction-explorer-backend
+    docker compose -p transaction-explorer rm -f transaction-explorer-backend
 fi
 
 # Start services

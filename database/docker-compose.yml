@@ -3,6 +3,7 @@ name: transaction-explorer
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     container_name: transaction-explorer-db
     environment:
       - ACCEPT_EULA=${ACCEPT_EULA}
@@ -29,6 +30,7 @@ services:
 
   db-init:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     depends_on:
       sqlserver:
         condition: service_healthy
