@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Disable parallel execution of tests -->
+    <MaxCpuCount>1</MaxCpuCount>
+    <!-- Set the .NET framework version -->
+    <TargetFramework>net9.0</TargetFramework>
+  </RunConfiguration>
+
+  <!-- MSTest configuration -->
+  <MSTest>
+    <!-- Disable parallel execution at the test method level -->
+    <Parallelize>
+      <Workers>1</Workers>
+      <Scope>MethodLevel</Scope>
+    </Parallelize>
+  </MSTest>
+
+  <!-- Test platform configuration -->
+  <TestRunParameters>
+    <!-- Additional parameters can be added here -->
+  </TestRunParameters>
+</RunSettings>

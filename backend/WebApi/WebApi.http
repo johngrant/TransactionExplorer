@@ -1,0 +1,34 @@
+@WebApi_HostAddress = http://localhost:5000
+
+### Default Weather Forecast (root endpoint)
+GET {{WebApi_HostAddress}}/
+Accept: application/json
+
+###
+
+### Get all transactions
+GET {{WebApi_HostAddress}}/api/transactions/
+Accept: application/json
+
+###
+
+### Get transaction by ID
+GET {{WebApi_HostAddress}}/api/transactions/1
+Accept: application/json
+
+###
+
+### Create new transaction
+POST {{WebApi_HostAddress}}/api/transactions/
+Content-Type: application/json
+
+{
+  "description": "Sample transaction description"
+}
+
+###i_HostAddress = http://localhost:5070
+
+GET {{WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
