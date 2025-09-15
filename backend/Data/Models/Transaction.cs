@@ -24,8 +24,13 @@ public class Transaction
     public decimal PurchaseAmount { get; set; }
 
     [Column(TypeName = "datetime2")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Column(TypeName = "datetime2")]
-    public DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    public void MarkAsUpdated()
+    {
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

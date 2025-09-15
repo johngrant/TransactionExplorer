@@ -18,33 +18,61 @@ public class TransactionRepository : ITransactionRepository
         return await _context.Transactions.ToListAsync();
     }
 
-    public Task<Transaction?> GetByIdAsync(int id)
+    public async Task<Transaction?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Transactions.FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public Task<Transaction?> GetByCustomIdAsync(string customId)
+    public async Task<Transaction?> GetByCustomIdAsync(string customId)
     {
-        throw new NotImplementedException();
+        return await _context.Transactions.FirstOrDefaultAsync(t => t.CustomId == customId);
     }
 
-    public Task<Transaction> CreateAsync(Transaction transaction)
+    public async Task<Transaction> CreateAsync(Transaction transaction)
     {
-        throw new NotImplementedException();
+        _context.Transactions.Add(transaction);
+        await _context.SaveChangesAsync();
+
+        return transaction;
     }
 
-    public Task<Transaction> UpdateAsync(Transaction transaction)
+    public async Task<Transaction> UpdateAsync(Transaction transaction)
     {
-        throw new NotImplementedException();
+        var existingTransaction = await _context.Transactions.FindAsync(transaction.Id);
+        if (existingTransaction == null)
+        {
+            throw new ArgumentException($"Transaction with ID {transaction.Id} not found", nameof(transaction));
+        }
+
+        // Update properties
+        existingTransaction.CustomId = transaction.CustomId;
+        existingTransaction.Description = transaction.Description;
+        existingTransaction.TransactionDate = transaction.TransactionDate;
+        existingTransaction.PurchaseAmount = transaction.PurchaseAmount;
+        existingTransaction.MarkAsUpdated();
+        // Keep original CreatedAt
+
+        await _context.SaveChangesAsync();
+
+        return existingTransaction;
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var transaction = await _context.Transactions.FindAsync(id);
+        if (transaction == null)
+        {
+            return false;
+        }
+
+        _context.Transactions.Remove(transaction);
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 
-    public Task<bool> ExistsAsync(string customId)
+    public async Task<bool> ExistsAsync(string customId)
     {
-        throw new NotImplementedException();
+        return await _context.Transactions.AnyAsync(t => t.CustomId == customId);
     }
 }
