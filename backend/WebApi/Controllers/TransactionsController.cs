@@ -28,6 +28,40 @@ public class TransactionsController : ControllerBase
     }
 
     /// <summary>
+    /// Get all transactions with pagination
+    /// </summary>
+    /// <param name="paginationParameters">Pagination parameters</param>
+    /// <returns>Paged list of transactions</returns>
+    [HttpGet("paged")]
+    public async Task<ActionResult<PagedResponse<Transaction>>> GetAllAsync([FromQuery] PaginationParameters paginationParameters)
+    {
+        // Calculate skip value (0-based indexing)
+        var skip = (paginationParameters.PageNumber - 1) * paginationParameters.PageSize;
+
+        // Get transactions with pagination using repository's general purpose Get method
+        var dataTransactions = await _transactionRepository.GetAsync(
+            predicate: null, // No filtering, get all transactions
+            orderBy: query => query.OrderByDescending(t => t.TransactionDate), // Order by transaction date descending
+            skip: skip,
+            take: paginationParameters.PageSize);
+
+        // Get total count for pagination metadata
+        var totalItems = await _transactionRepository.CountAsync();
+
+        // Map to web API models
+        var webApiTransactions = dataTransactions.Select(MapToWebApiModel);
+
+        // Create paged response
+        var pagedResponse = new PagedResponse<Transaction>(
+            webApiTransactions,
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize,
+            totalItems);
+
+        return Ok(pagedResponse);
+    }
+
+    /// <summary>
     /// Get a specific transaction by ID
     /// </summary>
     /// <param name="id">The transaction ID</param>

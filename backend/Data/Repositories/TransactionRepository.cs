@@ -144,4 +144,16 @@ public class TransactionRepository : ITransactionRepository
     {
         return await _context.Transactions.AnyAsync(t => t.CustomId == customId);
     }
+
+    public async Task<int> CountAsync(Expression<Func<Transaction, bool>>? predicate = null)
+    {
+        IQueryable<Transaction> query = _context.Transactions;
+
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        return await query.CountAsync();
+    }
 }

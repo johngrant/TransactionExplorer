@@ -344,4 +344,209 @@ public class TransactionsControllerTests
         Assert.IsNotNull(routeValues);
         Assert.AreEqual(transaction.Id, routeValues["id"]);
     }
+
+    #region Paged GetAll Tests
+
+    [TestMethod]
+    public async Task GetAllPaged_ReturnsFirstPage_WithValidPagination()
+    {
+        // Arrange
+        var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 1, PageSize = 2 };
+        var dataTransactions = new List<Data.Models.Transaction>
+        {
+            new() { Id = 1, CustomId = "T1", Description = "Transaction 1", TransactionDate = DateTime.Now.AddDays(-2), PurchaseAmount = 100m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new() { Id = 2, CustomId = "T2", Description = "Transaction 2", TransactionDate = DateTime.Now.AddDays(-1), PurchaseAmount = 200m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAsync(
+                null, // no predicate
+                It.IsAny<Func<IQueryable<Data.Models.Transaction>, IOrderedQueryable<Data.Models.Transaction>>>(),
+                0, // skip
+                2)) // take
+            .ReturnsAsync(dataTransactions);
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CountAsync(null))
+            .ReturnsAsync(5); // total of 5 transactions
+
+        // Act
+        var result = await _controller.GetAllAsync(paginationParams);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsNotNull(okResult);
+
+        var pagedResponse = okResult.Value as WebApi.Models.PagedResponse<Transaction>;
+        Assert.IsNotNull(pagedResponse);
+        Assert.AreEqual(1, pagedResponse.PageNumber);
+        Assert.AreEqual(2, pagedResponse.PageSize);
+        Assert.AreEqual(5, pagedResponse.TotalItems);
+        Assert.AreEqual(3, pagedResponse.TotalPages);
+        Assert.IsFalse(pagedResponse.HasPreviousPage);
+        Assert.IsTrue(pagedResponse.HasNextPage);
+        Assert.AreEqual(2, pagedResponse.Items.Count());
+    }
+
+    [TestMethod]
+    public async Task GetAllPaged_ReturnsSecondPage_WithValidPagination()
+    {
+        // Arrange
+        var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 2, PageSize = 2 };
+        var dataTransactions = new List<Data.Models.Transaction>
+        {
+            new() { Id = 3, CustomId = "T3", Description = "Transaction 3", TransactionDate = DateTime.Now, PurchaseAmount = 300m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new() { Id = 4, CustomId = "T4", Description = "Transaction 4", TransactionDate = DateTime.Now, PurchaseAmount = 400m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAsync(
+                null, // no predicate
+                It.IsAny<Func<IQueryable<Data.Models.Transaction>, IOrderedQueryable<Data.Models.Transaction>>>(),
+                2, // skip
+                2)) // take
+            .ReturnsAsync(dataTransactions);
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CountAsync(null))
+            .ReturnsAsync(5); // total of 5 transactions
+
+        // Act
+        var result = await _controller.GetAllAsync(paginationParams);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsNotNull(okResult);
+
+        var pagedResponse = okResult.Value as WebApi.Models.PagedResponse<Transaction>;
+        Assert.IsNotNull(pagedResponse);
+        Assert.AreEqual(2, pagedResponse.PageNumber);
+        Assert.AreEqual(2, pagedResponse.PageSize);
+        Assert.AreEqual(5, pagedResponse.TotalItems);
+        Assert.AreEqual(3, pagedResponse.TotalPages);
+        Assert.IsTrue(pagedResponse.HasPreviousPage);
+        Assert.IsTrue(pagedResponse.HasNextPage);
+        Assert.AreEqual(2, pagedResponse.Items.Count());
+    }
+
+    [TestMethod]
+    public async Task GetAllPaged_ReturnsLastPage_WithValidPagination()
+    {
+        // Arrange
+        var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 3, PageSize = 2 };
+        var dataTransactions = new List<Data.Models.Transaction>
+        {
+            new() { Id = 5, CustomId = "T5", Description = "Transaction 5", TransactionDate = DateTime.Now, PurchaseAmount = 500m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAsync(
+                null, // no predicate
+                It.IsAny<Func<IQueryable<Data.Models.Transaction>, IOrderedQueryable<Data.Models.Transaction>>>(),
+                4, // skip
+                2)) // take
+            .ReturnsAsync(dataTransactions);
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CountAsync(null))
+            .ReturnsAsync(5); // total of 5 transactions
+
+        // Act
+        var result = await _controller.GetAllAsync(paginationParams);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsNotNull(okResult);
+
+        var pagedResponse = okResult.Value as WebApi.Models.PagedResponse<Transaction>;
+        Assert.IsNotNull(pagedResponse);
+        Assert.AreEqual(3, pagedResponse.PageNumber);
+        Assert.AreEqual(2, pagedResponse.PageSize);
+        Assert.AreEqual(5, pagedResponse.TotalItems);
+        Assert.AreEqual(3, pagedResponse.TotalPages);
+        Assert.IsTrue(pagedResponse.HasPreviousPage);
+        Assert.IsFalse(pagedResponse.HasNextPage);
+        Assert.AreEqual(1, pagedResponse.Items.Count());
+    }
+
+    [TestMethod]
+    public async Task GetAllPaged_ReturnsEmptyPage_WhenNoTransactions()
+    {
+        // Arrange
+        var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 1, PageSize = 10 };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAsync(
+                null, // no predicate
+                It.IsAny<Func<IQueryable<Data.Models.Transaction>, IOrderedQueryable<Data.Models.Transaction>>>(),
+                0, // skip
+                10)) // take
+            .ReturnsAsync(new List<Data.Models.Transaction>());
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CountAsync(null))
+            .ReturnsAsync(0);
+
+        // Act
+        var result = await _controller.GetAllAsync(paginationParams);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsNotNull(okResult);
+
+        var pagedResponse = okResult.Value as WebApi.Models.PagedResponse<Transaction>;
+        Assert.IsNotNull(pagedResponse);
+        Assert.AreEqual(1, pagedResponse.PageNumber);
+        Assert.AreEqual(10, pagedResponse.PageSize);
+        Assert.AreEqual(0, pagedResponse.TotalItems);
+        Assert.AreEqual(0, pagedResponse.TotalPages);
+        Assert.IsFalse(pagedResponse.HasPreviousPage);
+        Assert.IsFalse(pagedResponse.HasNextPage);
+        Assert.AreEqual(0, pagedResponse.Items.Count());
+    }
+
+    [TestMethod]
+    public async Task GetAllPaged_ShouldOrderByTransactionDateDescending()
+    {
+        // Arrange
+        var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 1, PageSize = 10 };
+        var dataTransactions = new List<Data.Models.Transaction>
+        {
+            new() { Id = 2, CustomId = "T2", Description = "Transaction 2", TransactionDate = DateTime.Now, PurchaseAmount = 200m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new() { Id = 1, CustomId = "T1", Description = "Transaction 1", TransactionDate = DateTime.Now.AddDays(-1), PurchaseAmount = 100m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAsync(
+                null, // no predicate
+                It.IsAny<Func<IQueryable<Data.Models.Transaction>, IOrderedQueryable<Data.Models.Transaction>>>(),
+                0, // skip
+                10)) // take
+            .ReturnsAsync(dataTransactions);
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CountAsync(null))
+            .ReturnsAsync(2);
+
+        // Act
+        var result = await _controller.GetAllAsync(paginationParams);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsNotNull(okResult);
+
+        var pagedResponse = okResult.Value as WebApi.Models.PagedResponse<Transaction>;
+        Assert.IsNotNull(pagedResponse);
+
+        // Verify that the ordering function was called with TransactionDate descending
+        _mockTransactionRepository.Verify(
+            repo => repo.GetAsync(
+                null,
+                It.IsAny<Func<IQueryable<Data.Models.Transaction>, IOrderedQueryable<Data.Models.Transaction>>>(),
+                0,
+                10),
+            Times.Once);
+    }
+
+    #endregion
 }

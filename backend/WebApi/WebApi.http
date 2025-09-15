@@ -1,4 +1,4 @@
-@WebApi_HostAddress = http://localhost:5000
+@WebApi_HostAddress = http://localhost:5070
 
 ### Default Weather Forecast (root endpoint)
 GET {{WebApi_HostAddress}}/
@@ -6,8 +6,26 @@ Accept: application/json
 
 ###
 
-### Get all transactions
+### Get all transactions (original endpoint)
 GET {{WebApi_HostAddress}}/api/transactions/
+Accept: application/json
+
+###
+
+### Get paged transactions - first page (default: page 1, size 10)
+GET {{WebApi_HostAddress}}/api/transactions/paged
+Accept: application/json
+
+###
+
+### Get paged transactions - first page with specific page size
+GET {{WebApi_HostAddress}}/api/transactions/paged?pageNumber=1&pageSize=5
+Accept: application/json
+
+###
+
+### Get paged transactions - second page
+GET {{WebApi_HostAddress}}/api/transactions/paged?pageNumber=2&pageSize=5
 Accept: application/json
 
 ###
@@ -23,12 +41,10 @@ POST {{WebApi_HostAddress}}/api/transactions/
 Content-Type: application/json
 
 {
-  "description": "Sample transaction description"
+  "customId": "TEST-001",
+  "description": "Sample transaction description",
+  "transactionDate": "2024-09-15T10:00:00Z",
+  "purchaseAmount": 125.50
 }
-
-###i_HostAddress = http://localhost:5070
-
-GET {{WebApi_HostAddress}}/weatherforecast/
-Accept: application/json
 
 ###

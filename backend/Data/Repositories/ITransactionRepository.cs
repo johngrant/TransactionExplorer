@@ -22,4 +22,5 @@ public interface ITransactionRepository
     Task<Transaction> UpdateAsync(Transaction transaction);
     Task<bool> DeleteAsync(int id);
     Task<bool> ExistsAsync(string customId);
+    Task<int> CountAsync(Expression<Func<Transaction, bool>>? predicate = null);
 }
