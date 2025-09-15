@@ -1,4 +1,4 @@
-import { Filter, Loader2, RefreshCw, Search } from "lucide-react";
+import { Loader2, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
 import { Transaction } from "../services/api";
 import { Button } from "./ui/button";
@@ -96,9 +96,16 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
           </div>
           <div className="flex gap-2">
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Sort by">
+                  <span>Sort: {
+                    sortBy === "transactionDate" ? "Date" :
+                      sortBy === "purchaseAmount" ? "Amount" :
+                        sortBy === "description" ? "Description" :
+                          sortBy === "customId" ? "Custom ID" :
+                            sortBy === "id" ? "ID" : "Date"
+                  }</span>
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="transactionDate">Date</SelectItem>
