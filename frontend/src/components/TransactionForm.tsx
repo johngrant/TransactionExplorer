@@ -1,15 +1,9 @@
 import { useState } from "react";
+import { ApiService, Transaction } from "../services/api";
 import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-
-interface Transaction {
-  id: string;
-  description: string;
-  date: string;
-  amount: number;
-}
 
 interface TransactionFormProps {
   onAddTransaction: (transaction: Transaction) => void;
@@ -28,15 +22,17 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
     description: "",
     date: "",
     amount: "",
-    id: ""
+    customId: ""
   });
-  
+
   const [errors, setErrors] = useState<ValidationErrors>({
     description: "",
     date: "",
     amount: "",
     id: ""
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {
@@ -62,34 +58,50 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
       newErrors.amount = "Purchase amount must be valid rounded to nearest cent.";
     }
 
-    // ID validation
-    if (existingIds.includes(formData.id)) {
+    // Custom ID validation
+    if (existingIds.includes(formData.customId)) {
       newErrors.id = "Id must be unique.";
+    }
+
+    if (!formData.customId.trim()) {
+      newErrors.id = "Custom ID is required.";
+    }
+
+    if (formData.customId.length > 100) {
+      newErrors.id = "Custom ID cannot exceed 100 characters.";
     }
 
     setErrors(newErrors);
     return !Object.values(newErrors).some(error => error !== "");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (validateForm()) {
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const amount = Math.round(parseFloat(formData.amount) * 100) / 100; // Round to nearest cent
-      
-      onAddTransaction({
-        id: formData.id,
+
+      const newTransaction = await ApiService.createTransaction({
+        customId: formData.customId,
         description: formData.description,
-        date: formData.date,
-        amount: amount
+        transactionDate: formData.date,
+        purchaseAmount: amount
       });
+
+      onAddTransaction(newTransaction);
 
       // Reset form
       setFormData({
         description: "",
         date: "",
         amount: "",
-        id: ""
+        customId: ""
       });
       setErrors({
         description: "",
@@ -97,6 +109,13 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
         amount: "",
         id: ""
       });
+    } catch (error) {
+      setErrors(prev => ({
+        ...prev,
+        id: error instanceof Error ? error.message : 'Failed to create transaction'
+      }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,7 +147,7 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
                 <p className="text-destructive text-sm">{errors.description}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="date">Transaction Date</Label>
               <Input
@@ -141,7 +160,7 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
                 <p className="text-destructive text-sm">{errors.date}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="amount">Purchase Amount</Label>
               <Input
@@ -156,13 +175,13 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
                 <p className="text-destructive text-sm">{errors.amount}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="id">ID</Label>
+              <Label htmlFor="customId">Custom ID</Label>
               <Input
-                id="id"
-                value={formData.id}
-                onChange={(e) => handleInputChange("id", e.target.value)}
+                id="customId"
+                value={formData.customId}
+                onChange={(e) => handleInputChange("customId", e.target.value)}
                 placeholder="Enter unique transaction ID"
               />
               {errors.id && (
@@ -170,9 +189,13 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
               )}
             </div>
           </div>
-          
-          <Button type="submit" className="w-full md:w-auto">
-            Create Transaction
+
+          <Button
+            type="submit"
+            className="w-full md:w-auto"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating..." : "Create Transaction"}
           </Button>
         </form>
       </CardContent>
