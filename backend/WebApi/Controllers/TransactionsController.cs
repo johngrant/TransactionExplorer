@@ -85,7 +85,12 @@ public class TransactionsController : ControllerBase
         var transaction = new Transaction
         {
             Id = _nextId++,
-            Description = request.Description
+            CustomId = request.CustomId,
+            Description = request.Description,
+            TransactionDate = request.TransactionDate,
+            PurchaseAmount = request.PurchaseAmount,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         _transactions.Add(transaction);
