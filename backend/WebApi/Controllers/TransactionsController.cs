@@ -8,31 +8,11 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class TransactionsController : ControllerBase
 {
-    // Injected dependencies
     private readonly ITransactionRepository _transactionRepository;
-    private readonly IExchangeRateRepository _exchangeRateRepository;
 
-    public TransactionsController(
-        ITransactionRepository transactionRepository,
-        IExchangeRateRepository exchangeRateRepository)
+    public TransactionsController(ITransactionRepository transactionRepository)
     {
         _transactionRepository = transactionRepository;
-        _exchangeRateRepository = exchangeRateRepository;
-    }
-
-    // Lazy-initialized in-memory storage for demonstration purposes (keeping for now)
-    private static readonly Lazy<List<Transaction>> _lazyTransactions = new(() => new List<Transaction>());
-    private static int _nextId = 1;
-
-    private static List<Transaction> _transactions => _lazyTransactions.Value;
-
-    /// <summary>
-    /// Clear all transactions (for testing purposes)
-    /// </summary>
-    public static void ClearTransactions()
-    {
-        _transactions.Clear();
-        _nextId = 1;
     }
 
     /// <summary>
@@ -42,9 +22,9 @@ public class TransactionsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Transaction>>> GetAllAsync()
     {
-        // Simulate async operation
-        await Task.CompletedTask;
-        return Ok(_transactions);
+        var dataTransactions = await _transactionRepository.GetAllAsync();
+        var webApiTransactions = dataTransactions.Select(MapToWebApiModel);
+        return Ok(webApiTransactions);
     }
 
     /// <summary>
@@ -55,16 +35,15 @@ public class TransactionsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Transaction>> GetAsync(int id)
     {
-        // Simulate async operation
-        await Task.CompletedTask;
-        var transaction = _transactions.FirstOrDefault(t => t.Id == id);
+        var dataTransaction = await _transactionRepository.GetByIdAsync(id);
 
-        if (transaction == null)
+        if (dataTransaction == null)
         {
             return NotFound($"Transaction with ID {id} not found");
         }
 
-        return Ok(transaction);
+        var webApiTransaction = MapToWebApiModel(dataTransaction);
+        return Ok(webApiTransaction);
     }
 
     /// <summary>
@@ -80,11 +59,8 @@ public class TransactionsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // Simulate async operation
-        await Task.CompletedTask;
-        var transaction = new Transaction
+        var dataTransaction = new Data.Models.Transaction
         {
-            Id = _nextId++,
             CustomId = request.CustomId,
             Description = request.Description,
             TransactionDate = request.TransactionDate,
@@ -93,8 +69,28 @@ public class TransactionsController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        _transactions.Add(transaction);
+        var createdTransaction = await _transactionRepository.CreateAsync(dataTransaction);
+        var webApiTransaction = MapToWebApiModel(createdTransaction);
 
-        return CreatedAtAction(nameof(GetAsync), new { id = transaction.Id }, transaction);
+        return CreatedAtAction(nameof(GetAsync), new { id = webApiTransaction.Id }, webApiTransaction);
+    }
+
+    /// <summary>
+    /// Maps a Data.Models.Transaction to a WebApi.Models.Transaction
+    /// </summary>
+    /// <param name="dataTransaction">The data model transaction</param>
+    /// <returns>The web API model transaction</returns>
+    private static Transaction MapToWebApiModel(Data.Models.Transaction dataTransaction)
+    {
+        return new Transaction
+        {
+            Id = dataTransaction.Id,
+            CustomId = dataTransaction.CustomId,
+            Description = dataTransaction.Description,
+            TransactionDate = dataTransaction.TransactionDate,
+            PurchaseAmount = dataTransaction.PurchaseAmount,
+            CreatedAt = dataTransaction.CreatedAt,
+            UpdatedAt = dataTransaction.UpdatedAt
+        };
     }
 }

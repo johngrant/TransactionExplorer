@@ -9,49 +9,38 @@ namespace Tests;
 /// <summary>
 /// Unit tests for the TransactionsController.
 ///
-/// Note: The current controller implementation uses static in-memory storage for demonstration purposes,
-/// but also has injected repository dependencies for future use. These tests set up mocks for the
-/// repositories but currently test against the static storage implementation.
-///
-/// When the controller is updated to use the injected repositories, these tests should be updated
-/// to verify the repository interactions using the mocked objects.
+/// These tests verify that the controller properly uses the injected repository dependencies
+/// and handles various scenarios correctly.
 /// </summary>
 [TestClass]
-[DoNotParallelize]
 public class TransactionsControllerTests
 {
     private TransactionsController _controller = null!;
     private Mock<ITransactionRepository> _mockTransactionRepository = null!;
-    private Mock<IExchangeRateRepository> _mockExchangeRateRepository = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _mockTransactionRepository = new Mock<ITransactionRepository>();
-        _mockExchangeRateRepository = new Mock<IExchangeRateRepository>();
 
         _controller = new TransactionsController(
-            _mockTransactionRepository.Object,
-            _mockExchangeRateRepository.Object);
-
-        // Clear any existing static data before each test
-        TransactionsController.ClearTransactions();
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        // Clear any existing static data after each test
-        TransactionsController.ClearTransactions();
+            _mockTransactionRepository.Object);
     }
 
     [TestMethod]
     public async Task GetAll_ReturnsEmptyList_WhenNoTransactions()
     {
+        // Arrange
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAllAsync())
+            .ReturnsAsync(new List<Data.Models.Transaction>());
+
         // Act
         var result = await _controller.GetAllAsync();
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult);
 
@@ -72,10 +61,27 @@ public class TransactionsControllerTests
             PurchaseAmount = 100.50m
         };
 
+        var dataTransaction = new Data.Models.Transaction
+        {
+            Id = 1,
+            CustomId = request.CustomId,
+            Description = request.Description,
+            TransactionDate = request.TransactionDate,
+            PurchaseAmount = request.PurchaseAmount,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()))
+            .ReturnsAsync(dataTransaction);
+
         // Act
         var result = await _controller.CreateAsync(request);
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()), Times.Once);
+
         var createdResult = result.Result as CreatedAtActionResult;
         Assert.IsNotNull(createdResult);
 
@@ -84,49 +90,56 @@ public class TransactionsControllerTests
         Assert.AreEqual("Test transaction", transaction.Description);
         Assert.AreEqual("TEST-001", transaction.CustomId);
         Assert.AreEqual(100.50m, transaction.PurchaseAmount);
-        Assert.IsTrue(transaction.Id > 0);
+        Assert.AreEqual(1, transaction.Id);
     }
 
     [TestMethod]
     public async Task Get_ReturnsNotFound_WhenTransactionDoesNotExist()
     {
+        // Arrange
+        _mockTransactionRepository
+            .Setup(repo => repo.GetByIdAsync(999))
+            .ReturnsAsync((Data.Models.Transaction?)null);
+
         // Act
         var result = await _controller.GetAsync(999);
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.GetByIdAsync(999), Times.Once);
         Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
     }
 
     [TestMethod]
     public async Task Get_ReturnsTransaction_WhenTransactionExists()
     {
-        // Arrange - Make sure we start with a clean state
-        TransactionsController.ClearTransactions();
-
-        var createRequest = new CreateTransactionRequest
+        // Arrange
+        var dataTransaction = new Data.Models.Transaction
         {
+            Id = 1,
             CustomId = "TEST-002",
             Description = "Test transaction for retrieval",
-            TransactionDate = DateTime.Now,
-            PurchaseAmount = 75.25m
+            TransactionDate = DateTime.Now.Date,
+            PurchaseAmount = 75.25m,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
-        var createResult = await _controller.CreateAsync(createRequest);
-        var createdAtResult = createResult.Result as CreatedAtActionResult;
-        Assert.IsNotNull(createdAtResult, "Create should return CreatedAtActionResult");
 
-        var createdTransaction = createdAtResult.Value as Transaction;
-        Assert.IsNotNull(createdTransaction, "Created transaction should not be null");
+        _mockTransactionRepository
+            .Setup(repo => repo.GetByIdAsync(1))
+            .ReturnsAsync(dataTransaction);
 
         // Act
-        var result = await _controller.GetAsync(createdTransaction.Id);
+        var result = await _controller.GetAsync(1);
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.GetByIdAsync(1), Times.Once);
+
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult, "Get should return OkObjectResult");
 
         var transaction = okResult.Value as Transaction;
         Assert.IsNotNull(transaction, "Retrieved transaction should not be null");
-        Assert.AreEqual(createdTransaction.Id, transaction.Id);
+        Assert.AreEqual(1, transaction.Id);
         Assert.AreEqual("Test transaction for retrieval", transaction.Description);
         Assert.AreEqual("TEST-002", transaction.CustomId);
         Assert.AreEqual(75.25m, transaction.PurchaseAmount);
@@ -181,30 +194,41 @@ public class TransactionsControllerTests
     [TestMethod]
     public async Task GetAll_ReturnsTransactions_WhenTransactionsExist()
     {
-        // Arrange - Create a few transactions
-        var request1 = new CreateTransactionRequest
+        // Arrange
+        var dataTransactions = new List<Data.Models.Transaction>
         {
-            CustomId = "TEST-004",
-            Description = "First transaction",
-            TransactionDate = DateTime.Now,
-            PurchaseAmount = 50.00m
+            new Data.Models.Transaction
+            {
+                Id = 1,
+                CustomId = "TEST-004",
+                Description = "First transaction",
+                TransactionDate = DateTime.Now.Date,
+                PurchaseAmount = 50.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Data.Models.Transaction
+            {
+                Id = 2,
+                CustomId = "TEST-005",
+                Description = "Second transaction",
+                TransactionDate = DateTime.Now.AddDays(-1).Date,
+                PurchaseAmount = 125.75m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
         };
 
-        var request2 = new CreateTransactionRequest
-        {
-            CustomId = "TEST-005",
-            Description = "Second transaction",
-            TransactionDate = DateTime.Now.AddDays(-1),
-            PurchaseAmount = 125.75m
-        };
-
-        await _controller.CreateAsync(request1);
-        await _controller.CreateAsync(request2);
+        _mockTransactionRepository
+            .Setup(repo => repo.GetAllAsync())
+            .ReturnsAsync(dataTransactions);
 
         // Act
         var result = await _controller.GetAllAsync();
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
+
         var okResult = result.Result as OkObjectResult;
         Assert.IsNotNull(okResult);
 
@@ -230,10 +254,27 @@ public class TransactionsControllerTests
             PurchaseAmount = 99.99m
         };
 
+        var dataTransaction = new Data.Models.Transaction
+        {
+            Id = 1,
+            CustomId = request.CustomId,
+            Description = request.Description,
+            TransactionDate = request.TransactionDate,
+            PurchaseAmount = request.PurchaseAmount,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()))
+            .ReturnsAsync(dataTransaction);
+
         // Act
         var result = await _controller.CreateAsync(request);
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()), Times.Once);
+
         var createdResult = result.Result as CreatedAtActionResult;
         Assert.IsNotNull(createdResult);
 
@@ -241,16 +282,21 @@ public class TransactionsControllerTests
         Assert.IsNotNull(transaction);
         Assert.IsTrue(transaction.CreatedAt >= beforeCreate);
         Assert.IsTrue(transaction.UpdatedAt >= beforeCreate);
-        Assert.AreEqual(transaction.CreatedAt, transaction.UpdatedAt); // Should be same on creation
     }
 
     [TestMethod]
     public async Task Get_ReturnsNotFound_WhenNegativeId()
     {
+        // Arrange
+        _mockTransactionRepository
+            .Setup(repo => repo.GetByIdAsync(-1))
+            .ReturnsAsync((Data.Models.Transaction?)null);
+
         // Act
         var result = await _controller.GetAsync(-1);
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.GetByIdAsync(-1), Times.Once);
         Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
     }
 
@@ -266,10 +312,27 @@ public class TransactionsControllerTests
             PurchaseAmount = 150.00m
         };
 
+        var dataTransaction = new Data.Models.Transaction
+        {
+            Id = 1,
+            CustomId = request.CustomId,
+            Description = request.Description,
+            TransactionDate = request.TransactionDate,
+            PurchaseAmount = request.PurchaseAmount,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _mockTransactionRepository
+            .Setup(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()))
+            .ReturnsAsync(dataTransaction);
+
         // Act
         var result = await _controller.CreateAsync(request);
 
         // Assert
+        _mockTransactionRepository.Verify(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()), Times.Once);
+
         var createdResult = result.Result as CreatedAtActionResult;
         Assert.IsNotNull(createdResult);
         Assert.AreEqual(nameof(TransactionsController.GetAsync), createdResult.ActionName);
@@ -281,36 +344,4 @@ public class TransactionsControllerTests
         Assert.IsNotNull(routeValues);
         Assert.AreEqual(transaction.Id, routeValues["id"]);
     }
-
-    // Example test showing how to test with repository mocks when controller is updated
-    // This test is currently commented out because the controller doesn't use repositories yet
-    /*
-    [TestMethod]
-    public async Task GetAllAsync_CallsRepository_WhenUsingRepositoryPattern()
-    {
-        // Arrange
-        var expectedTransactions = new List<Data.Models.Transaction>
-        {
-            new Data.Models.Transaction { Id = 1, CustomId = "TEST-001", Description = "Test 1", PurchaseAmount = 100m },
-            new Data.Models.Transaction { Id = 2, CustomId = "TEST-002", Description = "Test 2", PurchaseAmount = 200m }
-        };
-
-        _mockTransactionRepository
-            .Setup(repo => repo.GetAllAsync())
-            .ReturnsAsync(expectedTransactions);
-
-        // Act
-        var result = await _controller.GetAllAsync();
-
-        // Assert
-        _mockTransactionRepository.Verify(repo => repo.GetAllAsync(), Times.Once);
-
-        var okResult = result.Result as OkObjectResult;
-        Assert.IsNotNull(okResult);
-
-        var transactions = okResult.Value as IEnumerable<Data.Models.Transaction>;
-        Assert.IsNotNull(transactions);
-        Assert.AreEqual(2, transactions.Count());
-    }
-    */
 }
