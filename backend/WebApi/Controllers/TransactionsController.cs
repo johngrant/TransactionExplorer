@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
+using Data.Repositories;
 
 namespace WebApi.Controllers;
 
@@ -7,7 +8,19 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 public class TransactionsController : ControllerBase
 {
-    // Lazy-initialized in-memory storage for demonstration purposes
+    // Injected dependencies
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly IExchangeRateRepository _exchangeRateRepository;
+
+    public TransactionsController(
+        ITransactionRepository transactionRepository,
+        IExchangeRateRepository exchangeRateRepository)
+    {
+        _transactionRepository = transactionRepository;
+        _exchangeRateRepository = exchangeRateRepository;
+    }
+
+    // Lazy-initialized in-memory storage for demonstration purposes (keeping for now)
     private static readonly Lazy<List<Transaction>> _lazyTransactions = new(() => new List<Transaction>());
     private static int _nextId = 1;
 
