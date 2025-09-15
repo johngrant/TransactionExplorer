@@ -26,10 +26,12 @@ export interface PaginationParameters {
 }
 
 export class ApiService {
-  static async getTransactions(params: PaginationParameters): Promise<PagedResponse<Transaction>> {
-    const url = new URL(`${API_BASE_URL}/transactions/paginated`);
-    url.searchParams.append('pageNumber', params.pageNumber.toString());
-    url.searchParams.append('pageSize', params.pageSize.toString());
+  static async getTransactions(
+    params: PaginationParameters
+  ): Promise<PagedResponse<Transaction>> {
+    const url = new URL(`${API_BASE_URL}/transactions/paged`);
+    url.searchParams.append("pageNumber", params.pageNumber.toString());
+    url.searchParams.append("pageSize", params.pageSize.toString());
 
     const response = await fetch(url.toString());
 
@@ -55,7 +57,24 @@ export class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to create transaction: ${response.statusText}`);
+      let errorMessage = `Failed to create transaction: ${response.statusText}`;
+
+      try {
+        // Try to get detailed error information from the response body
+        const errorBody = await response.json();
+
+        if (errorBody.errors) {
+          // ASP.NET Core validation errors format
+          const validationErrors = Object.values(errorBody.errors).flat();
+          errorMessage = validationErrors.join(", ");
+        } else if (errorBody.title) {
+          errorMessage = errorBody.title;
+        }
+      } catch {
+        // If we can't parse the error body, use the status text
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();

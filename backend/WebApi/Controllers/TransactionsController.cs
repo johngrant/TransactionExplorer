@@ -66,7 +66,7 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="id">The transaction ID</param>
     /// <returns>The transaction if found</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<Transaction>> GetAsync(int id)
     {
         var dataTransaction = await _transactionRepository.GetByIdAsync(id);
@@ -106,7 +106,7 @@ public class TransactionsController : ControllerBase
         var createdTransaction = await _transactionRepository.CreateAsync(dataTransaction);
         var webApiTransaction = MapToWebApiModel(createdTransaction);
 
-        return CreatedAtAction(nameof(GetAsync), new { id = webApiTransaction.Id }, webApiTransaction);
+        return Created($"/api/transactions/{webApiTransaction.Id}", webApiTransaction);
     }
 
     /// <summary>

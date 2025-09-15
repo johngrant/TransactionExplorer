@@ -13,7 +13,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=host.docker.internal,1433;Database=TransactionExplorer;User Id=sa;Password=YourPassword123!;TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal,1433;Database=TransactionExplorer;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=true;
     volumes:
       - ./backend:/src # Mount source code for hot reload
     restart: unless-stopped

@@ -82,7 +82,7 @@ public class TransactionsControllerTests
         // Assert
         _mockTransactionRepository.Verify(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()), Times.Once);
 
-        var createdResult = result.Result as CreatedAtActionResult;
+        var createdResult = result.Result as CreatedResult;
         Assert.IsNotNull(createdResult);
 
         var transaction = createdResult.Value as Transaction;
@@ -275,7 +275,7 @@ public class TransactionsControllerTests
         // Assert
         _mockTransactionRepository.Verify(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()), Times.Once);
 
-        var createdResult = result.Result as CreatedAtActionResult;
+        var createdResult = result.Result as CreatedResult;
         Assert.IsNotNull(createdResult);
 
         var transaction = createdResult.Value as Transaction;
@@ -301,7 +301,7 @@ public class TransactionsControllerTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_ReturnsCreatedAtAction_WithCorrectRouteValues()
+    public async Task CreateAsync_ReturnsCreated_WithCorrectLocationUrl()
     {
         // Arrange
         var request = new CreateTransactionRequest
@@ -333,16 +333,13 @@ public class TransactionsControllerTests
         // Assert
         _mockTransactionRepository.Verify(repo => repo.CreateAsync(It.IsAny<Data.Models.Transaction>()), Times.Once);
 
-        var createdResult = result.Result as CreatedAtActionResult;
+        var createdResult = result.Result as CreatedResult;
         Assert.IsNotNull(createdResult);
-        Assert.AreEqual(nameof(TransactionsController.GetAsync), createdResult.ActionName);
+        Assert.AreEqual("/api/transactions/1", createdResult.Location);
 
         var transaction = createdResult.Value as Transaction;
         Assert.IsNotNull(transaction);
-
-        var routeValues = createdResult.RouteValues;
-        Assert.IsNotNull(routeValues);
-        Assert.AreEqual(transaction.Id, routeValues["id"]);
+        Assert.AreEqual(1, transaction.Id);
     }
 
     #region Paged GetAll Tests

@@ -43,7 +43,9 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
     };
 
     // Description validation
-    if (formData.description.length > 50) {
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required.";
+    } else if (formData.description.length > 50) {
       newErrors.description = "Description too long. Must be less than 50 chars.";
     }
 
@@ -87,10 +89,13 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
     try {
       const amount = Math.round(parseFloat(formData.amount) * 100) / 100; // Round to nearest cent
 
+      // Format date as ISO string for the API
+      const transactionDate = new Date(formData.date).toISOString();
+
       const newTransaction = await ApiService.createTransaction({
         customId: formData.customId,
         description: formData.description,
-        transactionDate: formData.date,
+        transactionDate: transactionDate,
         purchaseAmount: amount
       });
 
@@ -110,10 +115,25 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
         id: ""
       });
     } catch (error) {
-      setErrors(prev => ({
-        ...prev,
-        id: error instanceof Error ? error.message : 'Failed to create transaction'
-      }));
+      console.error('Error creating transaction:', error);
+
+      if (error instanceof Error) {
+        // Try to parse server validation errors if available
+        const errorMessage = error.message;
+        if (errorMessage.includes('Description')) {
+          setErrors(prev => ({ ...prev, description: 'Description is required' }));
+        } else if (errorMessage.includes('CustomId')) {
+          setErrors(prev => ({ ...prev, id: 'Custom ID is required' }));
+        } else if (errorMessage.includes('PurchaseAmount')) {
+          setErrors(prev => ({ ...prev, amount: 'Purchase amount must be greater than 0' }));
+        } else if (errorMessage.includes('TransactionDate')) {
+          setErrors(prev => ({ ...prev, date: 'Invalid transaction date' }));
+        } else {
+          setErrors(prev => ({ ...prev, id: errorMessage }));
+        }
+      } else {
+        setErrors(prev => ({ ...prev, id: 'Failed to create transaction' }));
+      }
     } finally {
       setIsSubmitting(false);
     }
