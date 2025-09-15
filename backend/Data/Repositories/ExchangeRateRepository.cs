@@ -1,5 +1,6 @@
 using Data.Context;
 using Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories;
 
@@ -12,33 +13,50 @@ public class ExchangeRateRepository : IExchangeRateRepository
         _context = context;
     }
 
-    public Task<IEnumerable<ExchangeRate>> GetAllAsync()
+    public async Task<IEnumerable<ExchangeRate>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.ExchangeRates.ToListAsync();
     }
 
-    public Task<ExchangeRate?> GetByIdAsync(int id)
+    public async Task<ExchangeRate?> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.ExchangeRates.FindAsync(id);
     }
 
-    public Task<ExchangeRate?> GetLatestRateAsync(string countryCurrencyDesc, DateTime transactionDate)
+    public async Task<ExchangeRate?> GetLatestRateAsync(string countryCurrencyDesc, DateTime transactionDate)
     {
-        throw new NotImplementedException();
+        return await _context.ExchangeRates
+            .Where(r => r.CountryCurrencyDesc == countryCurrencyDesc && r.EffectiveDate <= transactionDate)
+            .OrderByDescending(r => r.EffectiveDate)
+            .FirstOrDefaultAsync();
     }
 
-    public Task<IEnumerable<ExchangeRate>> GetRatesForDateRangeAsync(string countryCurrencyDesc, DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<ExchangeRate>> GetRatesForDateRangeAsync(string countryCurrencyDesc, DateTime startDate, DateTime endDate)
     {
-        throw new NotImplementedException();
+        return await _context.ExchangeRates
+            .Where(r => r.CountryCurrencyDesc == countryCurrencyDesc &&
+                       r.EffectiveDate >= startDate &&
+                       r.EffectiveDate <= endDate)
+            .ToListAsync();
     }
 
-    public Task<ExchangeRate> CreateAsync(ExchangeRate exchangeRate)
+    public async Task<ExchangeRate> CreateAsync(ExchangeRate exchangeRate)
     {
-        throw new NotImplementedException();
+        _context.ExchangeRates.Add(exchangeRate);
+        await _context.SaveChangesAsync();
+        return exchangeRate;
     }
 
-    public Task<IEnumerable<ExchangeRate>> CreateBulkAsync(IEnumerable<ExchangeRate> exchangeRates)
+    public async Task<IEnumerable<ExchangeRate>> CreateBulkAsync(IEnumerable<ExchangeRate> exchangeRates)
     {
-        throw new NotImplementedException();
+        var exchangeRateList = exchangeRates.ToList();
+        if (!exchangeRateList.Any())
+        {
+            return exchangeRateList;
+        }
+
+        _context.ExchangeRates.AddRange(exchangeRateList);
+        await _context.SaveChangesAsync();
+        return exchangeRateList;
     }
 }
