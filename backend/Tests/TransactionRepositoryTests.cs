@@ -494,4 +494,505 @@ public class TransactionRepositoryTests
         // Assert
         Assert.IsFalse(result);
     }
+
+    #region GetAsync Tests
+
+    [TestMethod]
+    public async Task GetAsync_WithNoPredicate_ReturnsAllTransactions()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Transaction 1",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 100.50m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "Transaction 2",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 200.75m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAsync();
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count());
+    }
+
+    [TestMethod]
+    public async Task GetAsync_WithPredicate_ReturnsFilteredTransactions()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Low Amount",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 50.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "High Amount",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 150.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAsync(predicate: t => t.PurchaseAmount > 100);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(1, result.Count());
+        Assert.AreEqual("TXN002", result.First().CustomId);
+    }
+
+    [TestMethod]
+    public async Task GetAsync_WithOrderBy_ReturnsOrderedTransactions()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN003",
+                Description = "Transaction C",
+                TransactionDate = new DateTime(2025, 1, 17),
+                PurchaseAmount = 300.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Transaction A",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 100.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAsync(orderBy: q => q.OrderBy(t => t.TransactionDate));
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count());
+        Assert.AreEqual("TXN001", result.First().CustomId);
+        Assert.AreEqual("TXN003", result.Last().CustomId);
+    }
+
+    [TestMethod]
+    public async Task GetAsync_WithPaging_ReturnsCorrectPage()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Transaction 1",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 100.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "Transaction 2",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 200.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN003",
+                Description = "Transaction 3",
+                TransactionDate = new DateTime(2025, 1, 17),
+                PurchaseAmount = 300.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAsync(
+            orderBy: q => q.OrderBy(t => t.CustomId),
+            skip: 1,
+            take: 1);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(1, result.Count());
+        Assert.AreEqual("TXN002", result.First().CustomId);
+    }
+
+    [TestMethod]
+    public async Task GetAsync_WithComplexQuery_ReturnsExpectedResults()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Low Amount Early",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 50.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "High Amount Early",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 150.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN003",
+                Description = "High Amount Late",
+                TransactionDate = new DateTime(2025, 1, 20),
+                PurchaseAmount = 200.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repository.GetAsync(
+            predicate: t => t.PurchaseAmount > 100,
+            orderBy: q => q.OrderByDescending(t => t.PurchaseAmount),
+            skip: 0,
+            take: 1);
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual(1, result.Count());
+        Assert.AreEqual("TXN003", result.First().CustomId);
+    }
+
+    #endregion
+
+    #region StreamAsync Tests
+
+    [TestMethod]
+    public async Task StreamAsync_WithNoPredicate_ReturnsAllTransactions()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Transaction 1",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 100.50m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "Transaction 2",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 200.75m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var resultList = new List<Transaction>();
+        await foreach (var transaction in repository.StreamAsync())
+        {
+            resultList.Add(transaction);
+        }
+
+        // Assert
+        Assert.AreEqual(2, resultList.Count);
+    }
+
+    [TestMethod]
+    public async Task StreamAsync_WithPredicate_ReturnsFilteredTransactions()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Low Amount",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 50.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "High Amount",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 150.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var resultList = new List<Transaction>();
+        await foreach (var transaction in repository.StreamAsync(predicate: t => t.PurchaseAmount > 100))
+        {
+            resultList.Add(transaction);
+        }
+
+        // Assert
+        Assert.AreEqual(1, resultList.Count);
+        Assert.AreEqual("TXN002", resultList.First().CustomId);
+    }
+
+    [TestMethod]
+    public async Task StreamAsync_WithOrderBy_ReturnsOrderedTransactions()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN003",
+                Description = "Transaction C",
+                TransactionDate = new DateTime(2025, 1, 17),
+                PurchaseAmount = 300.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Transaction A",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 100.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var resultList = new List<Transaction>();
+        await foreach (var transaction in repository.StreamAsync(orderBy: q => q.OrderBy(t => t.TransactionDate)))
+        {
+            resultList.Add(transaction);
+        }
+
+        // Assert
+        Assert.AreEqual(2, resultList.Count);
+        Assert.AreEqual("TXN001", resultList.First().CustomId);
+        Assert.AreEqual("TXN003", resultList.Last().CustomId);
+    }
+
+    [TestMethod]
+    public async Task StreamAsync_WithPaging_ReturnsCorrectPage()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Transaction 1",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 100.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "Transaction 2",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 200.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN003",
+                Description = "Transaction 3",
+                TransactionDate = new DateTime(2025, 1, 17),
+                PurchaseAmount = 300.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var resultList = new List<Transaction>();
+        await foreach (var transaction in repository.StreamAsync(
+            orderBy: q => q.OrderBy(t => t.CustomId),
+            skip: 1,
+            take: 1))
+        {
+            resultList.Add(transaction);
+        }
+
+        // Assert
+        Assert.AreEqual(1, resultList.Count);
+        Assert.AreEqual("TXN002", resultList.First().CustomId);
+    }
+
+    [TestMethod]
+    public async Task StreamAsync_WithComplexQuery_ReturnsExpectedResults()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                CustomId = "TXN001",
+                Description = "Low Amount Early",
+                TransactionDate = new DateTime(2025, 1, 15),
+                PurchaseAmount = 50.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN002",
+                Description = "High Amount Early",
+                TransactionDate = new DateTime(2025, 1, 16),
+                PurchaseAmount = 150.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                CustomId = "TXN003",
+                Description = "High Amount Late",
+                TransactionDate = new DateTime(2025, 1, 20),
+                PurchaseAmount = 200.00m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Transactions.AddRange(transactions);
+        await context.SaveChangesAsync();
+
+        // Act
+        var resultList = new List<Transaction>();
+        await foreach (var transaction in repository.StreamAsync(
+            predicate: t => t.PurchaseAmount > 100,
+            orderBy: q => q.OrderByDescending(t => t.PurchaseAmount),
+            skip: 0,
+            take: 1))
+        {
+            resultList.Add(transaction);
+        }
+
+        // Assert
+        Assert.AreEqual(1, resultList.Count);
+        Assert.AreEqual("TXN003", resultList.First().CustomId);
+    }
+
+    [TestMethod]
+    public async Task StreamAsync_WithEmptyResult_ReturnsNoItems()
+    {
+        // Arrange
+        using var context = GetInMemoryDbContext();
+        var repository = new TransactionRepository(context);
+
+        // Act
+        var resultList = new List<Transaction>();
+        await foreach (var transaction in repository.StreamAsync(predicate: t => t.PurchaseAmount > 1000))
+        {
+            resultList.Add(transaction);
+        }
+
+        // Assert
+        Assert.AreEqual(0, resultList.Count);
+    }
+
+    #endregion
 }

@@ -1,6 +1,7 @@
 using Data.Context;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Data.Repositories;
 
@@ -26,6 +27,74 @@ public class TransactionRepository : ITransactionRepository
     public async Task<Transaction?> GetByCustomIdAsync(string customId)
     {
         return await _context.Transactions.FirstOrDefaultAsync(t => t.CustomId == customId);
+    }
+
+    public async Task<IEnumerable<Transaction>> GetAsync(
+        Expression<Func<Transaction, bool>>? predicate = null,
+        Func<IQueryable<Transaction>, IOrderedQueryable<Transaction>>? orderBy = null,
+        int? skip = null,
+        int? take = null)
+    {
+        IQueryable<Transaction> query = _context.Transactions;
+
+        // Apply filtering predicate if provided
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        // Apply ordering if provided
+        if (orderBy != null)
+        {
+            query = orderBy(query);
+        }
+
+        // Apply paging
+        if (skip.HasValue)
+        {
+            query = query.Skip(skip.Value);
+        }
+
+        if (take.HasValue)
+        {
+            query = query.Take(take.Value);
+        }
+
+        return await query.ToListAsync();
+    }
+
+    public IAsyncEnumerable<Transaction> StreamAsync(
+        Expression<Func<Transaction, bool>>? predicate = null,
+        Func<IQueryable<Transaction>, IOrderedQueryable<Transaction>>? orderBy = null,
+        int? skip = null,
+        int? take = null)
+    {
+        IQueryable<Transaction> query = _context.Transactions;
+
+        // Apply filtering predicate if provided
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        // Apply ordering if provided
+        if (orderBy != null)
+        {
+            query = orderBy(query);
+        }
+
+        // Apply paging
+        if (skip.HasValue)
+        {
+            query = query.Skip(skip.Value);
+        }
+
+        if (take.HasValue)
+        {
+            query = query.Take(take.Value);
+        }
+
+        return query.AsAsyncEnumerable();
     }
 
     public async Task<Transaction> CreateAsync(Transaction transaction)
