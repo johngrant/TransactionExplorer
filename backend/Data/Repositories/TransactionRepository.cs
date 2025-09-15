@@ -1,5 +1,6 @@
 using Data.Context;
 using Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories;
 
@@ -12,9 +13,9 @@ public class TransactionRepository : ITransactionRepository
         _context = context;
     }
 
-    public Task<IEnumerable<Transaction>> GetAllAsync()
+    public async Task<IEnumerable<Transaction>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Transactions.ToListAsync();
     }
 
     public Task<Transaction?> GetByIdAsync(int id)
