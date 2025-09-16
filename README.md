@@ -116,6 +116,7 @@ The frontend is fully responsive and optimized for:
 - 📱 **Mobile phones**: Touch-friendly interface with optimized layouts
 - 📱 **Tablets**: Adaptive design for medium screen sizes
 - 💻 **Desktop**: Full-featured interface with enhanced productivity
+- 🌓 **Light & Dark Mode**: Toggle between light and dark themes for optimal viewing comfort
 
 ### API Documentation
 - **Swagger UI**: Interactive API documentation and testing interface
