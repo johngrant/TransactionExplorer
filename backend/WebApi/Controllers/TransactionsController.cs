@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 using Data.Repositories;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Controllers;
 
@@ -144,9 +145,11 @@ public class TransactionsController : ControllerBase
     /// <returns>The created transaction</returns>
     /// <response code="201">Returns the newly created transaction</response>
     /// <response code="400">If the request is invalid</response>
+    /// <response code="409">If the CustomId already exists</response>
     [HttpPost]
     [ProducesResponseType(typeof(Transaction), (int)HttpStatusCode.Created)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Conflict)]
     public async Task<ActionResult<Transaction>> CreateAsync([FromBody] CreateTransactionRequest request)
     {
         _logger.LogInformation($"Executing {nameof(CreateAsync)}()");
@@ -172,6 +175,12 @@ public class TransactionsController : ControllerBase
             var webApiTransaction = MapToWebApiModel(createdTransaction);
 
             return Created($"/api/transactions/{webApiTransaction.Id}", webApiTransaction);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key") == true ||
+                                           ex.InnerException?.Message.Contains("UNIQUE constraint") == true)
+        {
+            _logger.LogWarning(ex, "Attempted to create transaction with duplicate CustomId: {CustomId}", request.CustomId);
+            return Conflict($"A transaction with CustomId '{request.CustomId}' already exists. CustomId must be unique.");
         }
         catch (Exception ex)
         {

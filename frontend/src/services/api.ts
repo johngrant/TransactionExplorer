@@ -79,19 +79,33 @@ export class ApiService {
     if (!response.ok) {
       let errorMessage = `Failed to create transaction: ${response.statusText}`;
 
-      try {
-        // Try to get detailed error information from the response body
-        const errorBody = await response.json();
-
-        if (errorBody.errors) {
-          // ASP.NET Core validation errors format
-          const validationErrors = Object.values(errorBody.errors).flat();
-          errorMessage = validationErrors.join(", ");
-        } else if (errorBody.title) {
-          errorMessage = errorBody.title;
+      // Handle specific status codes
+      if (response.status === 409) {
+        // Conflict - likely duplicate CustomId
+        try {
+          const errorText = await response.text();
+          errorMessage =
+            errorText ||
+            "A transaction with this CustomId already exists. CustomId must be unique.";
+        } catch {
+          errorMessage =
+            "A transaction with this CustomId already exists. CustomId must be unique.";
         }
-      } catch {
-        // If we can't parse the error body, use the status text
+      } else {
+        try {
+          // Try to get detailed error information from the response body
+          const errorBody = await response.json();
+
+          if (errorBody.errors) {
+            // ASP.NET Core validation errors format
+            const validationErrors = Object.values(errorBody.errors).flat();
+            errorMessage = validationErrors.join(", ");
+          } else if (errorBody.title) {
+            errorMessage = errorBody.title;
+          }
+        } catch {
+          // If we can't parse the error body, use the status text
+        }
       }
 
       throw new Error(errorMessage);

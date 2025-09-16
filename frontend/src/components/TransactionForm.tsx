@@ -66,7 +66,7 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
     }
 
     if (!formData.customId.trim()) {
-      newErrors.id = "Custom ID is required.";
+      newErrors.id = "Unique custom id is required.";
     }
 
     if (formData.customId.length > 100) {
@@ -120,7 +120,12 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
       if (error instanceof Error) {
         // Try to parse server validation errors if available
         const errorMessage = error.message;
-        if (errorMessage.includes('Description')) {
+        
+        // Check for 409 conflict (duplicate CustomId) first
+        if (errorMessage.includes('CustomId already exists') || 
+            errorMessage.includes('CustomId must be unique')) {
+          setErrors(prev => ({ ...prev, id: 'Id must be unique.' }));
+        } else if (errorMessage.includes('Description')) {
           setErrors(prev => ({ ...prev, description: 'Description is required' }));
         } else if (errorMessage.includes('CustomId')) {
           setErrors(prev => ({ ...prev, id: 'Custom ID is required' }));
@@ -142,8 +147,9 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: "" }));
+    const errorField = field === 'customId' ? 'id' : field;
+    if (errors[errorField as keyof ValidationErrors]) {
+      setErrors(prev => ({ ...prev, [errorField]: "" }));
     }
   };
 
