@@ -39,7 +39,8 @@ transaction-explorer/
 ### Full System (Recommended)
 ```bash
 ./up.sh     # Start entire system (database + backend + frontend)
-./down.sh   # Stop entire system
+cd frontend
+./start.sh
 ```
 
 ### Individual Services
