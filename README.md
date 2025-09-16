@@ -220,3 +220,9 @@ Each component can be developed and deployed independently:
 - **Frontend**: Located in `/frontend` - React application with Vite
 
 For detailed deployment instructions, see the respective documentation files in each directory.
+
+## 🚀 Future Improvements
+
+- **Containerize the frontend**: Add Docker support for the React frontend to enable full containerization of the entire application stack
+- **Add React Testing Library**: Implement comprehensive component testing with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for better frontend test coverage
+- **Add Cypress for automated browser testing**: Integrate [Cypress](https://www.cypress.io/) for end-to-end testing and automated browser testing to ensure UI functionality across different environments
