@@ -125,6 +125,8 @@ The project includes comprehensive unit testing across both frontend and backend
 - **[Polly](https://github.com/App-vNext/Polly)**: Resilience library for handling transient exchange rate API failures
 - **[RestSharp](https://restsharp.dev/)**: HTTP client for flexible exchange rate API calls
 - **[Swashbuckle/Swagger](https://swagger.io/)**: API documentation and testing interface
+- <img width="901" height="688" alt="image" src="https://github.com/user-attachments/assets/8fea6d3d-da4d-4525-8a04-69772ef266af" />
+
 
 #### Frontend (React 18)
 - **[React](https://reactjs.org/)**: Modern JavaScript library for building user interfaces
