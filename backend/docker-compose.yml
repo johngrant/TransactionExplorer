@@ -11,10 +11,10 @@ services:
       target: build # Use build stage for development
     container_name: transaction-explorer-api
     ports:
-      - "5070:8080" # Match the port from launchSettings.json
+      - "5070:5070" # Match the port from launchSettings.json
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:5070
       - ConnectionStrings__DefaultConnection=Server=transaction-explorer-db,1433;Database=TransactionExplorer;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=true;
     volumes:
       - .:/src # Mount source code for hot reload
@@ -29,7 +29,7 @@ services:
         "--project",
         "WebApi/WebApi.csproj",
         "--urls",
-        "http://+:8080",
+        "http://+:5070",
       ]
 
 networks:

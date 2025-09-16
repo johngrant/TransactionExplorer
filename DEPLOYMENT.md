@@ -67,7 +67,7 @@ deploy.sh                   # Automated deployment script
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ASPNETCORE_ENVIRONMENT` | Runtime environment | `Development` |
-| `ASPNETCORE_URLS` | Binding URLs | `http://+:8080` |
+| `ASPNETCORE_URLS` | Binding URLs | `http://+:5070` |
 | `ConnectionStrings__DefaultConnection` | Database connection string | SQL Server connection |
 
 ### Database Configuration
