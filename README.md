@@ -226,6 +226,7 @@ This solution addresses the requirements specified in the **WEX TAG and Gateways
 ### ✅ Technical Requirements
 - **Modern Framework**: Built with .NET 9.0 and React 18
 - **Containerization**: Docker support for all components
+- <img width="1020" height="671" alt="image" src="https://github.com/user-attachments/assets/c87b7cb8-096a-49d9-be06-072e877b11c5" />
 - **Testing**: Unit test coverage for critical components
 - **Resilience**: Polly integration for handling external API failures
 - **Responsive UI**: Mobile-first design approach
