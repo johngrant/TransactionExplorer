@@ -120,10 +120,10 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
       if (error instanceof Error) {
         // Try to parse server validation errors if available
         const errorMessage = error.message;
-        
+
         // Check for 409 conflict (duplicate CustomId) first
-        if (errorMessage.includes('CustomId already exists') || 
-            errorMessage.includes('CustomId must be unique')) {
+        if (errorMessage.includes('CustomId already exists') ||
+          errorMessage.includes('CustomId must be unique')) {
           setErrors(prev => ({ ...prev, id: 'Id must be unique.' }));
         } else if (errorMessage.includes('Description')) {
           setErrors(prev => ({ ...prev, description: 'Description is required' }));
