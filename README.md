@@ -1,6 +1,18 @@
-# Transaction Explorer
+# Transactio## 📑 Table of Contents
 
-A comprehensive transaction management system with API backend, database integration, and responsive web frontend. This solution provides currency conversion capabilities with real-time exchange rates from the U.S. Treasury API, featuring a robust .NET Core backend and modern React frontend.
+- [🎬 Demo](#-demo)
+- [🏗️ Project Structure](#️-project-structure)
+- [⚡ Quick Start](#-quick-start)
+- [🔧 Dependencies](#-dependencies)
+- [✨ Features](#-features)r## � Demo
+
+Watch a complete walkthrough of the Transaction Explorer application in action:
+
+🎬 **[Click here to view the demo](https://www.loom.com/share/1b9594d0dde54cd088ec5867d0bd6d97?sid=fc94bb2c-0c04-4f5a-b8de-7d6bf1125d7f)**
+
+The demo showcases the full functionality including transaction management, currency conversion with real-time exchange rates, and the responsive user interface across different screen sizes.
+
+## 🏗️ Project Structure comprehensive transaction management system with API backend, database integration, and responsive web frontend. This solution provides currency conversion capabilities with real-time exchange rates from the U.S. Treasury API, featuring a robust .NET Core backend and modern React frontend.
 
 ![2025-09-16 11 59 39](https://github.com/user-attachments/assets/c98eaef2-9b31-4139-a480-626c77d3241a)
 
