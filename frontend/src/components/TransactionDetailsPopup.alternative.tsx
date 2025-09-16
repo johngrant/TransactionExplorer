@@ -1,9 +1,10 @@
 import { Calendar, Clock, DollarSign, FileText, Hash, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ApiService, Transaction } from "../services/api";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { LoadingSpinner } from "./ui/loading-spinner";
 import { Separator } from "./ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
@@ -16,7 +17,7 @@ interface TransactionDetailsPopupProps {
     onDelete?: (transactionId: number) => void;
 }
 
-export function TransactionDetailsPopup({
+export function TransactionDetailsPopupAlternative({
     transactionId,
     isOpen,
     onClose,
@@ -26,6 +27,7 @@ export function TransactionDetailsPopup({
     const [loading, setLoading] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const isMobile = useIsMobile();
 
     // Load transaction details when popup opens
@@ -56,6 +58,7 @@ export function TransactionDetailsPopup({
             setError(null);
             setLoading(false);
             setDeleting(false);
+            setShowDeleteDialog(false);
         }
     }, [isOpen]);
 
@@ -87,6 +90,7 @@ export function TransactionDetailsPopup({
             setError(err instanceof Error ? err.message : "Failed to delete transaction");
         } finally {
             setDeleting(false);
+            setShowDeleteDialog(false);
         }
     };
 
@@ -138,7 +142,7 @@ export function TransactionDetailsPopup({
         }
 
         return (
-            <div className="space-y-6">
+            <>
                 {/* Transaction Header */}
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -193,6 +197,7 @@ export function TransactionDetailsPopup({
                 {/* Metadata */}
                 <div className="space-y-3">
                     <h4 className="font-medium text-sm text-muted-foreground">Metadata</h4>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -210,62 +215,57 @@ export function TransactionDetailsPopup({
                         </div>
                     </div>
                 </div>
-
-                <Separator />
-
-                {/* Main content without actions */}
-            </div>
+            </>
         );
     };
 
-    const renderActions = () => {
-        if (loading || error || !transaction) {
-            return null;
-        }
-
-        return (
-            <div className="flex justify-end gap-2 pt-4 border-t bg-background">
-                <Button variant="outline" onClick={onClose}>
-                    Close
-                </Button>
-                <Button
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="flex items-center gap-2"
-                >
-                    {deleting ? (
-                        <>
-                            <LoadingSpinner text="Deleting..." size="sm" />
-                        </>
-                    ) : (
-                        <>
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                        </>
-                    )}
-                </Button>
-            </div>
-        );
-    };
-
-    // Use Sheet for mobile, Dialog for desktop
+    // Solution 2: Using DialogFooter Component
     if (isMobile) {
         return (
             <Sheet open={isOpen} onOpenChange={onClose}>
                 <SheetContent
                     side="bottom"
-                    className="h-full max-h-screen inset-x-0 bottom-0 top-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom flex flex-col p-0 border-t"
+                    className="h-full max-h-screen inset-x-0 bottom-0 top-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom flex flex-col p-6 border-t"
                 >
-                    <SheetHeader className="text-left mb-6 px-6 pt-6">
+                    <SheetHeader className="text-left mb-6">
                         <SheetTitle>Transaction Details</SheetTitle>
                     </SheetHeader>
-                    <div className="flex-1 overflow-y-auto px-6">
+                    <div className="flex-1 overflow-y-auto pr-2 pb-4">
                         {renderContent()}
                     </div>
-                    <div className="px-6 pb-6">
-                        {renderActions()}
-                    </div>
+                    {!loading && !error && transaction && (
+                        <div className="flex justify-end gap-2 pt-4 border-t bg-background">
+                            <Button variant="outline" onClick={onClose}>
+                                Close
+                            </Button>
+                            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" className="flex items-center gap-2">
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Are you sure you want to delete transaction #{transaction.id}? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleDelete}
+                                            disabled={deleting}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                            {deleting ? "Deleting..." : "Delete"}
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    )}
                 </SheetContent>
             </Sheet>
         );
@@ -273,16 +273,46 @@ export function TransactionDetailsPopup({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
-                <DialogHeader className="px-6 pt-6">
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                <DialogHeader>
                     <DialogTitle>Transaction Details</DialogTitle>
                 </DialogHeader>
-                <div className="flex-1 overflow-y-auto px-6">
+                <div className="flex-1 overflow-y-auto pr-2">
                     {renderContent()}
                 </div>
-                <div className="px-6 pb-6">
-                    {renderActions()}
-                </div>
+                {!loading && !error && transaction && (
+                    <DialogFooter className="pt-4 border-t">
+                        <Button variant="outline" onClick={onClose}>
+                            Close
+                        </Button>
+                        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" className="flex items-center gap-2">
+                                    <Trash2 className="h-4 w-4" />
+                                    Delete
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to delete transaction #{transaction.id}? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleDelete}
+                                        disabled={deleting}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                        {deleting ? "Deleting..." : "Delete"}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </DialogFooter>
+                )}
             </DialogContent>
         </Dialog>
     );
