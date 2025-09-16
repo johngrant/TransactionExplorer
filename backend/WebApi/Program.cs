@@ -1,4 +1,5 @@
 using Data.Extensions;
+using Services.Extensions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WebApi.Converters;
@@ -19,6 +20,9 @@ builder.Services.AddControllers()
 
 // Add Data Services
 builder.Services.AddDataServices(builder.Configuration);
+
+// Add Treasury Exchange Rate Client Services
+builder.Services.AddTreasuryExchangeRateClient(builder.Configuration);
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -70,7 +74,13 @@ app.MapGet("/", () =>
         endpoints = new
         {
             health = "/health",
-            transactions = "/api/transactions"
+            transactions = "/api/transactions",
+            exchangeRates = new
+            {
+                rates = "/api/exchangerate/rates?transactionDate=YYYY-MM-DD&countryCurrencyDesc=Currency-Description",
+                latest = "/api/exchangerate/latest?transactionDate=YYYY-MM-DD&countryCurrencyDesc=Currency-Description",
+                convert = "/api/exchangerate/convert?transactionDate=YYYY-MM-DD&amountUsd=100.00&countryCurrencyDesc=Currency-Description"
+            }
         }
     });
 })
