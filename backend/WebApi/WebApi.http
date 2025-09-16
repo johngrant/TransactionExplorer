@@ -48,3 +48,13 @@ Content-Type: application/json
 }
 
 ###
+
+### Delete transaction by ID (successful deletion)
+DELETE {{WebApi_HostAddress}}/api/transactions/1
+
+###
+
+### Delete transaction by ID (non-existent transaction)
+DELETE {{WebApi_HostAddress}}/api/transactions/999
+
+###

@@ -110,6 +110,24 @@ public class TransactionsController : ControllerBase
     }
 
     /// <summary>
+    /// Delete a transaction by ID
+    /// </summary>
+    /// <param name="id">The transaction ID</param>
+    /// <returns>No content if successful, NotFound if transaction doesn't exist</returns>
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeleteAsync(int id)
+    {
+        var deleted = await _transactionRepository.DeleteAsync(id);
+
+        if (!deleted)
+        {
+            return NotFound($"Transaction with ID {id} not found");
+        }
+
+        return NoContent();
+    }
+
+    /// <summary>
     /// Maps a Data.Models.Transaction to a WebApi.Models.Transaction
     /// </summary>
     /// <param name="dataTransaction">The data model transaction</param>

@@ -546,4 +546,91 @@ public class TransactionsControllerTests
     }
 
     #endregion
+
+    #region Delete Tests
+
+    [TestMethod]
+    public async Task Delete_ReturnsNoContent_WhenTransactionExists()
+    {
+        // Arrange
+        var transactionId = 1;
+        _mockTransactionRepository
+            .Setup(repo => repo.DeleteAsync(transactionId))
+            .ReturnsAsync(true);
+
+        // Act
+        var result = await _controller.DeleteAsync(transactionId);
+
+        // Assert
+        _mockTransactionRepository.Verify(repo => repo.DeleteAsync(transactionId), Times.Once);
+
+        var noContentResult = result as NoContentResult;
+        Assert.IsNotNull(noContentResult);
+        Assert.AreEqual(204, noContentResult.StatusCode);
+    }
+
+    [TestMethod]
+    public async Task Delete_ReturnsNotFound_WhenTransactionDoesNotExist()
+    {
+        // Arrange
+        var transactionId = 999;
+        _mockTransactionRepository
+            .Setup(repo => repo.DeleteAsync(transactionId))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await _controller.DeleteAsync(transactionId);
+
+        // Assert
+        _mockTransactionRepository.Verify(repo => repo.DeleteAsync(transactionId), Times.Once);
+
+        var notFoundResult = result as NotFoundObjectResult;
+        Assert.IsNotNull(notFoundResult);
+        Assert.AreEqual(404, notFoundResult.StatusCode);
+        Assert.AreEqual($"Transaction with ID {transactionId} not found", notFoundResult.Value);
+    }
+
+    [TestMethod]
+    public async Task Delete_ReturnsNotFound_WhenTransactionIdIsZero()
+    {
+        // Arrange
+        var transactionId = 0;
+        _mockTransactionRepository
+            .Setup(repo => repo.DeleteAsync(transactionId))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await _controller.DeleteAsync(transactionId);
+
+        // Assert
+        _mockTransactionRepository.Verify(repo => repo.DeleteAsync(transactionId), Times.Once);
+
+        var notFoundResult = result as NotFoundObjectResult;
+        Assert.IsNotNull(notFoundResult);
+        Assert.AreEqual(404, notFoundResult.StatusCode);
+        Assert.AreEqual($"Transaction with ID {transactionId} not found", notFoundResult.Value);
+    }
+
+    [TestMethod]
+    public async Task Delete_ReturnsNotFound_WhenTransactionIdIsNegative()
+    {
+        // Arrange
+        var transactionId = -1;
+        _mockTransactionRepository
+            .Setup(repo => repo.DeleteAsync(transactionId))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await _controller.DeleteAsync(transactionId);
+
+        // Assert
+        _mockTransactionRepository.Verify(repo => repo.DeleteAsync(transactionId), Times.Once);
+
+        var notFoundResult = result as NotFoundObjectResult;
+        Assert.IsNotNull(notFoundResult);
+        Assert.AreEqual(404, notFoundResult.StatusCode);
+        Assert.AreEqual($"Transaction with ID {transactionId} not found", notFoundResult.Value);
+    }
+
+    #endregion
 }
