@@ -42,6 +42,16 @@ export class ApiService {
     return response.json();
   }
 
+  static async getTransaction(id: number): Promise<Transaction> {
+    const response = await fetch(`${API_BASE_URL}/transactions/${id}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to get transaction: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
   static async createTransaction(transaction: {
     customId: string;
     description: string;
@@ -78,5 +88,15 @@ export class ApiService {
     }
 
     return response.json();
+  }
+
+  static async deleteTransaction(id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete transaction: ${response.statusText}`);
+    }
   }
 }

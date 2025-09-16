@@ -1,6 +1,7 @@
 import { Loader2, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
 import { Transaction } from "../services/api";
+import { TransactionDetailsPopup } from "./TransactionDetailsPopup";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -12,12 +13,15 @@ interface TransactionTableProps {
   loading?: boolean;
   hasMore?: boolean;
   onRefresh?: () => void;
+  onTransactionDeleted?: (transactionId: number) => void;
 }
 
-export function TransactionTable({ transactions, loading = false, hasMore = false, onRefresh }: TransactionTableProps) {
+export function TransactionTable({ transactions, loading = false, hasMore = false, onRefresh, onTransactionDeleted }: TransactionTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("transactionDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const filteredAndSortedTransactions = transactions
     .filter(transaction =>
@@ -64,6 +68,20 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+  };
+
+  const handleRowClick = (transaction: Transaction) => {
+    setSelectedTransactionId(transaction.id);
+    setIsPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedTransactionId(null);
+  };
+
+  const handleTransactionDeleted = (transactionId: number) => {
+    onTransactionDeleted?.(transactionId);
   };
 
   return (
@@ -142,7 +160,11 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
                 </TableRow>
               ) : (
                 filteredAndSortedTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
+                  <TableRow
+                    key={transaction.id}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleRowClick(transaction)}
+                  >
                     <TableCell className="font-mono">{transaction.id}</TableCell>
                     <TableCell className="font-mono">{transaction.customId}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
@@ -174,6 +196,14 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
           </Table>
         </div>
       </CardContent>
+
+      {/* Transaction Details Popup */}
+      <TransactionDetailsPopup
+        transactionId={selectedTransactionId}
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+        onDelete={handleTransactionDeleted}
+      />
     </Card>
   );
 }

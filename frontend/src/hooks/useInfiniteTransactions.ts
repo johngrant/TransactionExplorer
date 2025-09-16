@@ -9,6 +9,7 @@ interface UseInfiniteTransactionsReturn {
   loadMore: () => void;
   refresh: () => void;
   addTransaction: (transaction: Transaction) => void;
+  removeTransaction: (transactionId: number) => void;
 }
 
 export function useInfiniteTransactions(
@@ -75,6 +76,10 @@ export function useInfiniteTransactions(
     setTransactions((prev) => [transaction, ...prev]);
   }, []);
 
+  const removeTransaction = useCallback((transactionId: number) => {
+    setTransactions((prev) => prev.filter((t) => t.id !== transactionId));
+  }, []);
+
   return {
     transactions,
     loading,
@@ -83,5 +88,6 @@ export function useInfiniteTransactions(
     loadMore,
     refresh,
     addTransaction,
+    removeTransaction,
   };
 }

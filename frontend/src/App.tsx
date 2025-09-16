@@ -16,6 +16,7 @@ export default function App() {
     loadMore,
     refresh,
     addTransaction,
+    removeTransaction,
   } = useInfiniteTransactions(50);
 
   useInfiniteScroll({
@@ -27,6 +28,10 @@ export default function App() {
 
   const handleAddTransaction = (transaction: Transaction) => {
     addTransaction(transaction);
+  };
+
+  const handleTransactionDeleted = (transactionId: number) => {
+    removeTransaction(transactionId);
   };
 
   const existingIds = transactions.map(t => t.customId);
@@ -63,6 +68,7 @@ export default function App() {
                 loading={loading}
                 hasMore={hasMore}
                 onRefresh={refresh}
+                onTransactionDeleted={handleTransactionDeleted}
               />
             </div>
           </div>
