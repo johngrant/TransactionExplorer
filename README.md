@@ -1,10 +1,7 @@
-# Transactio## 📑 Table of Contents
+# Transaction Explorer
 
-- [🎬 Demo](#-demo)
-- [🏗️ Project Structure](#️-project-structure)
-- [⚡ Quick Start](#-quick-start)
-- [🔧 Dependencies](#-dependencies)
-- [✨ Features](#-features)r## � Demo
+![2025-09-16 11 59 39](https://github.com/user-attachments/assets/c98eaef2-9b31-4139-a480-626c77d3241a)
+
 
 Watch a complete walkthrough of the Transaction Explorer application in action:
 
@@ -12,14 +9,9 @@ Watch a complete walkthrough of the Transaction Explorer application in action:
 
 The demo showcases the full functionality including transaction management, currency conversion with real-time exchange rates, and the responsive user interface across different screen sizes.
 
-## 🏗️ Project Structure comprehensive transaction management system with API backend, database integration, and responsive web frontend. This solution provides currency conversion capabilities with real-time exchange rates from the U.S. Treasury API, featuring a robust .NET Core backend and modern React frontend.
-
-![2025-09-16 11 59 39](https://github.com/user-attachments/assets/c98eaef2-9b31-4139-a480-626c77d3241a)
-
 ## 📑 Table of Contents
 
-- [� Demo](#-demo)
-- [�🏗️ Project Structure](#%EF%B8%8F-project-structure)
+- [🏗️ Project Structure](#%EF%B8%8F-project-structure)
 - [⚡ Quick Start](#-quick-start)
 - [🔧 Dependencies](#-dependencies)
 - [✨ Features](#-features)
@@ -29,12 +21,7 @@ The demo showcases the full functionality including transaction management, curr
 - [🔧 Development](#-development)
 - [🚀 Future Improvements](#-future-improvements)
 
-
-## � Demo
-
-<div style="position: relative; padding-bottom: 62.42774566473989%; height: 0;"><iframe src="https://www.loom.com/embed/1b9594d0dde54cd088ec5867d0bd6d97?sid=8c35e73e-fe2f-4c1c-b7f1-87ab2c57eeb3" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
-
-## �🏗️ Project Structure
+## 🏗️ Project Structure
 
 ```
 transaction-explorer/
@@ -71,7 +58,7 @@ transaction-explorer/
 ```bash
 ./up.sh     # Start entire system (database + backend + frontend)
 
-# Wait 2-3 minutes for database and backend to fully initialize.
+# Wait database, backend, and frontend to fully initialize.
 ```
 
 ### Individual Services
