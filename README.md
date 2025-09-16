@@ -53,6 +53,8 @@ transaction-explorer/
 ### Full System (Recommended)
 ```bash
 ./up.sh     # Start entire system (database + backend + frontend)
+
+# Wait 2-3 minutes for database and backend to fully initialize.
 ```
 
 ### Individual Services
