@@ -99,8 +99,8 @@ public class TransactionsController : ControllerBase
             Description = request.Description,
             TransactionDate = request.TransactionDate,
             PurchaseAmount = request.PurchaseAmount,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
         };
 
         var createdTransaction = await _transactionRepository.CreateAsync(dataTransaction);

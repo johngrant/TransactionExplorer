@@ -9,8 +9,8 @@ BEGIN
         Description NVARCHAR(50) NOT NULL,
         TransactionDate DATE NOT NULL,
         PurchaseAmount DECIMAL(19,2) NOT NULL CHECK (PurchaseAmount > 0),
-        CreatedAt DATETIME2 DEFAULT GETUTCDATE(),
-        UpdatedAt DATETIME2 DEFAULT GETUTCDATE()
+        CreatedAt DATETIMEOFFSET DEFAULT SYSDATETIMEOFFSET(),
+        UpdatedAt DATETIMEOFFSET DEFAULT SYSDATETIMEOFFSET()
     );
     PRINT 'Transactions table created successfully.';
 END
@@ -30,7 +30,7 @@ BEGIN
         CountryCurrencyDesc NVARCHAR(100) NOT NULL,
         ExchangeRate DECIMAL(19,6) NOT NULL,
         EffectiveDate DATE NOT NULL,
-        CreatedAt DATETIME2 DEFAULT GETUTCDATE(),
+        CreatedAt DATETIMEOFFSET DEFAULT SYSDATETIMEOFFSET(),
 
         -- Index for efficient lookups by currency and date
         INDEX IX_ExchangeRates_Currency_Date NONCLUSTERED (CountryCurrencyDesc, EffectiveDate DESC),

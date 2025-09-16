@@ -23,6 +23,6 @@ public class ExchangeRate
     [Column(TypeName = "date")]
     public DateOnly EffectiveDate { get; set; }
 
-    [Column(TypeName = "datetime2")]
-    public DateTime CreatedAt { get; set; }
+    [Column(TypeName = "datetimeoffset")]
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

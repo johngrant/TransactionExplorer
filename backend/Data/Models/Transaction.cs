@@ -23,14 +23,14 @@ public class Transaction
     [Column(TypeName = "decimal(19,2)")]
     public decimal PurchaseAmount { get; set; }
 
-    [Column(TypeName = "datetime2")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [Column(TypeName = "datetimeoffset")]
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-    [Column(TypeName = "datetime2")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    [Column(TypeName = "datetimeoffset")]
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public void MarkAsUpdated()
     {
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 }

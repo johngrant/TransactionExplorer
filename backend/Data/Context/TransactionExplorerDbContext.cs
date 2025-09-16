@@ -43,12 +43,12 @@ public class TransactionExplorerDbContext : DbContext
                 .IsRequired();
 
             entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime2")
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasColumnType("datetimeoffset")
+                .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
             entity.Property(e => e.UpdatedAt)
-                .HasColumnType("datetime2")
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasColumnType("datetimeoffset")
+                .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
             // Add check constraint for positive purchase amount
             entity.ToTable(t => t.HasCheckConstraint("CK_Transactions_PurchaseAmount", "PurchaseAmount > 0"));
@@ -80,8 +80,8 @@ public class TransactionExplorerDbContext : DbContext
                 .IsRequired();
 
             entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime2")
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasColumnType("datetimeoffset")
+                .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
             // Create indexes for efficient lookups
             entity.HasIndex(e => new { e.CountryCurrencyDesc, e.EffectiveDate })
@@ -116,10 +116,10 @@ public class TransactionExplorerDbContext : DbContext
 
             if (entityEntry.State == EntityState.Added)
             {
-                entity.CreatedAt = DateTime.UtcNow;
+                entity.CreatedAt = DateTimeOffset.UtcNow;
             }
 
-            entity.UpdatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

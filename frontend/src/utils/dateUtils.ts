@@ -2,6 +2,8 @@
  * Date formatting utilities to ensure consistent date handling across the application
  */
 
+import moment from "moment";
+
 /**
  * Formats a date string to a localized date string for transaction dates.
  * Handles date strings that come from the API as date-only strings (YYYY-MM-DD).
@@ -115,22 +117,44 @@ export function formatTransactionDateDetailed(dateString: string): string {
 /**
  * Formats a datetime string to a localized datetime string.
  * Used for timestamps like createdAt, updatedAt.
+ * Converts UTC datetime to local timezone using moment.js.
  *
- * @param dateTimeString - The datetime string from the API
+ * @param dateTimeString - The datetime string from the API (ISO format, typically UTC)
  * @returns A formatted datetime string in the user's local timezone
  */
 export function formatDateTime(dateTimeString: string): string {
-  const date = new Date(dateTimeString);
-
-  if (isNaN(date.getTime())) {
+  if (!dateTimeString) {
     return "Invalid Date";
   }
 
-  return date.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const momentDate = moment(dateTimeString);
+
+  if (!momentDate.isValid()) {
+    return "Invalid Date";
+  }
+
+  // Format in local timezone with clear indication
+  return momentDate.format("MMM D, YYYY, h:mm A");
+}
+
+/**
+ * Formats a datetime string to a localized datetime string with timezone information.
+ * Used for timestamps like createdAt, updatedAt when explicit timezone display is needed.
+ *
+ * @param dateTimeString - The datetime string from the API (ISO format, typically UTC)
+ * @returns A formatted datetime string in the user's local timezone with timezone abbreviation
+ */
+export function formatDateTimeWithTimezone(dateTimeString: string): string {
+  if (!dateTimeString) {
+    return "Invalid Date";
+  }
+
+  const momentDate = moment(dateTimeString);
+
+  if (!momentDate.isValid()) {
+    return "Invalid Date";
+  }
+
+  // Format in local timezone with timezone abbreviation
+  return momentDate.format("MMM D, YYYY, h:mm A z");
 }

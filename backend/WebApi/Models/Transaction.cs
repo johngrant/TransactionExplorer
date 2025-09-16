@@ -23,7 +23,7 @@ public class Transaction
     [Range(0.01, double.MaxValue, ErrorMessage = "Purchase amount must be greater than 0")]
     public decimal PurchaseAmount { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 }
