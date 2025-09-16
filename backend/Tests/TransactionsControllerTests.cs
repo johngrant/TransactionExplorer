@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using WebApi.Controllers;
 using WebApi.Models;
@@ -17,14 +18,17 @@ public class TransactionsControllerTests
 {
     private TransactionsController _controller = null!;
     private Mock<ITransactionRepository> _mockTransactionRepository = null!;
+    private Mock<ILogger<TransactionsController>> _mockLogger = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _mockTransactionRepository = new Mock<ITransactionRepository>();
+        _mockLogger = new Mock<ILogger<TransactionsController>>();
 
         _controller = new TransactionsController(
-            _mockTransactionRepository.Object);
+            _mockTransactionRepository.Object,
+            _mockLogger.Object);
     }
 
     [TestMethod]

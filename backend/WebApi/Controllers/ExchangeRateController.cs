@@ -13,10 +13,12 @@ namespace WebApi.Controllers;
 public class ExchangeRateController : ControllerBase
 {
     private readonly ITreasuryExchangeRateClient _treasuryClient;
+    private readonly ILogger<ExchangeRateController> _logger;
 
-    public ExchangeRateController(ITreasuryExchangeRateClient treasuryClient)
+    public ExchangeRateController(ITreasuryExchangeRateClient treasuryClient, ILogger<ExchangeRateController> logger)
     {
         _treasuryClient = treasuryClient ?? throw new ArgumentNullException(nameof(treasuryClient));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -41,17 +43,19 @@ public class ExchangeRateController : ControllerBase
         [FromQuery] string countryCurrencyDesc,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
-        {
-            return BadRequest("Currency description cannot be null or empty");
-        }
-
-        // Calculate the date range: 6 months before the transaction date up to the transaction date
-        var startDate = transactionDate.AddMonths(-6);
-        var endDate = transactionDate;
+        _logger.LogInformation($"Executing {nameof(GetExchangeRatesForPeriod)}()");
 
         try
         {
+            if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
+            {
+                return BadRequest("Currency description cannot be null or empty");
+            }
+
+            // Calculate the date range: 6 months before the transaction date up to the transaction date
+            var startDate = transactionDate.AddMonths(-6);
+            var endDate = transactionDate;
+
             var response = await _treasuryClient.GetExchangeRatesForCurrencyAsync(
                 countryCurrencyDesc,
                 startDate,
@@ -67,8 +71,12 @@ public class ExchangeRateController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception (in a real application, you'd use ILogger)
+            _logger.LogError(ex, "An error occurred while retrieving exchange rates");
             return StatusCode(500, $"An error occurred while retrieving exchange rates: {ex.Message}");
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(GetExchangeRatesForPeriod)}()");
         }
     }
 
@@ -94,13 +102,15 @@ public class ExchangeRateController : ControllerBase
         [FromQuery] string countryCurrencyDesc,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
-        {
-            return BadRequest("Currency description cannot be null or empty");
-        }
+        _logger.LogInformation($"Executing {nameof(GetLatestExchangeRate)}()");
 
         try
         {
+            if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
+            {
+                return BadRequest("Currency description cannot be null or empty");
+            }
+
             var response = await _treasuryClient.GetLatestExchangeRateAsync(
                 countryCurrencyDesc,
                 transactionDate,
@@ -115,8 +125,12 @@ public class ExchangeRateController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception (in a real application, you'd use ILogger)
+            _logger.LogError(ex, "An error occurred while retrieving exchange rate");
             return StatusCode(500, $"An error occurred while retrieving exchange rate: {ex.Message}");
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(GetLatestExchangeRate)}()");
         }
     }
 
@@ -145,18 +159,20 @@ public class ExchangeRateController : ControllerBase
         [FromQuery] string countryCurrencyDesc,
         CancellationToken cancellationToken = default)
     {
-        if (amountUsd <= 0)
-        {
-            return BadRequest("Amount must be a positive value");
-        }
-
-        if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
-        {
-            return BadRequest("Currency description cannot be null or empty");
-        }
+        _logger.LogInformation($"Executing {nameof(Convert)}()");
 
         try
         {
+            if (amountUsd <= 0)
+            {
+                return BadRequest("Amount must be a positive value");
+            }
+
+            if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
+            {
+                return BadRequest("Currency description cannot be null or empty");
+            }
+
             var response = await _treasuryClient.GetLatestExchangeRateAsync(
                 countryCurrencyDesc,
                 transactionDate,
@@ -197,8 +213,12 @@ public class ExchangeRateController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception (in a real application, you'd use ILogger)
+            _logger.LogError(ex, "An error occurred while converting currency");
             return StatusCode(500, $"An error occurred while converting currency: {ex.Message}");
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(Convert)}()");
         }
     }
 }

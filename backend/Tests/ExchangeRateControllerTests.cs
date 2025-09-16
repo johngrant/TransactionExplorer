@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Services.Interfaces;
 using Services.Models;
@@ -18,12 +19,14 @@ public class ExchangeRateControllerTests
 {
     private ExchangeRateController _controller = null!;
     private Mock<ITreasuryExchangeRateClient> _mockTreasuryClient = null!;
+    private Mock<ILogger<ExchangeRateController>> _mockLogger = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _mockTreasuryClient = new Mock<ITreasuryExchangeRateClient>();
-        _controller = new ExchangeRateController(_mockTreasuryClient.Object);
+        _mockLogger = new Mock<ILogger<ExchangeRateController>>();
+        _controller = new ExchangeRateController(_mockTreasuryClient.Object, _mockLogger.Object);
     }
 
     [TestMethod]

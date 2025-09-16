@@ -12,10 +12,12 @@ namespace WebApi.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly ITransactionRepository _transactionRepository;
+    private readonly ILogger<TransactionsController> _logger;
 
-    public TransactionsController(ITransactionRepository transactionRepository)
+    public TransactionsController(ITransactionRepository transactionRepository, ILogger<TransactionsController> logger)
     {
         _transactionRepository = transactionRepository;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -27,9 +29,23 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<Transaction>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<IEnumerable<Transaction>>> GetAllAsync()
     {
-        var dataTransactions = await _transactionRepository.GetAllAsync();
-        var webApiTransactions = dataTransactions.Select(MapToWebApiModel);
-        return Ok(webApiTransactions);
+        _logger.LogInformation($"Executing {nameof(GetAllAsync)}()");
+
+        try
+        {
+            var dataTransactions = await _transactionRepository.GetAllAsync();
+            var webApiTransactions = dataTransactions.Select(MapToWebApiModel);
+            return Ok(webApiTransactions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving all transactions");
+            throw;
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(GetAllAsync)}()");
+        }
     }
 
     /// <summary>
@@ -44,30 +60,44 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     public async Task<ActionResult<PagedResponse<Transaction>>> GetAllAsync([FromQuery] PaginationParameters paginationParameters)
     {
-        // Calculate skip value (0-based indexing)
-        var skip = (paginationParameters.PageNumber - 1) * paginationParameters.PageSize;
+        _logger.LogInformation($"Executing {nameof(GetAllAsync)}() with pagination");
 
-        // Get transactions with pagination using repository's general purpose Get method
-        var dataTransactions = await _transactionRepository.GetAsync(
-            predicate: null, // No filtering, get all transactions
-            orderBy: query => query.OrderByDescending(t => t.TransactionDate), // Order by transaction date descending
-            skip: skip,
-            take: paginationParameters.PageSize);
+        try
+        {
+            // Calculate skip value (0-based indexing)
+            var skip = (paginationParameters.PageNumber - 1) * paginationParameters.PageSize;
 
-        // Get total count for pagination metadata
-        var totalItems = await _transactionRepository.CountAsync();
+            // Get transactions with pagination using repository's general purpose Get method
+            var dataTransactions = await _transactionRepository.GetAsync(
+                predicate: null, // No filtering, get all transactions
+                orderBy: query => query.OrderByDescending(t => t.TransactionDate), // Order by transaction date descending
+                skip: skip,
+                take: paginationParameters.PageSize);
 
-        // Map to web API models
-        var webApiTransactions = dataTransactions.Select(MapToWebApiModel);
+            // Get total count for pagination metadata
+            var totalItems = await _transactionRepository.CountAsync();
 
-        // Create paged response
-        var pagedResponse = new PagedResponse<Transaction>(
-            webApiTransactions,
-            paginationParameters.PageNumber,
-            paginationParameters.PageSize,
-            totalItems);
+            // Map to web API models
+            var webApiTransactions = dataTransactions.Select(MapToWebApiModel);
 
-        return Ok(pagedResponse);
+            // Create paged response
+            var pagedResponse = new PagedResponse<Transaction>(
+                webApiTransactions,
+                paginationParameters.PageNumber,
+                paginationParameters.PageSize,
+                totalItems);
+
+            return Ok(pagedResponse);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving paged transactions");
+            throw;
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(GetAllAsync)}() with pagination");
+        }
     }
 
     /// <summary>
@@ -82,15 +112,29 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     public async Task<ActionResult<Transaction>> GetAsync(int id)
     {
-        var dataTransaction = await _transactionRepository.GetByIdAsync(id);
+        _logger.LogInformation($"Executing {nameof(GetAsync)}()");
 
-        if (dataTransaction == null)
+        try
         {
-            return NotFound($"Transaction with ID {id} not found");
-        }
+            var dataTransaction = await _transactionRepository.GetByIdAsync(id);
 
-        var webApiTransaction = MapToWebApiModel(dataTransaction);
-        return Ok(webApiTransaction);
+            if (dataTransaction == null)
+            {
+                return NotFound($"Transaction with ID {id} not found");
+            }
+
+            var webApiTransaction = MapToWebApiModel(dataTransaction);
+            return Ok(webApiTransaction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving transaction by ID");
+            throw;
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(GetAsync)}()");
+        }
     }
 
     /// <summary>
@@ -105,25 +149,39 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     public async Task<ActionResult<Transaction>> CreateAsync([FromBody] CreateTransactionRequest request)
     {
-        if (!ModelState.IsValid)
+        _logger.LogInformation($"Executing {nameof(CreateAsync)}()");
+
+        try
         {
-            return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var dataTransaction = new Data.Models.Transaction
+            {
+                CustomId = request.CustomId,
+                Description = request.Description,
+                TransactionDate = request.TransactionDate,
+                PurchaseAmount = request.PurchaseAmount,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+
+            var createdTransaction = await _transactionRepository.CreateAsync(dataTransaction);
+            var webApiTransaction = MapToWebApiModel(createdTransaction);
+
+            return Created($"/api/transactions/{webApiTransaction.Id}", webApiTransaction);
         }
-
-        var dataTransaction = new Data.Models.Transaction
+        catch (Exception ex)
         {
-            CustomId = request.CustomId,
-            Description = request.Description,
-            TransactionDate = request.TransactionDate,
-            PurchaseAmount = request.PurchaseAmount,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
-
-        var createdTransaction = await _transactionRepository.CreateAsync(dataTransaction);
-        var webApiTransaction = MapToWebApiModel(createdTransaction);
-
-        return Created($"/api/transactions/{webApiTransaction.Id}", webApiTransaction);
+            _logger.LogError(ex, "An error occurred while creating transaction");
+            throw;
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(CreateAsync)}()");
+        }
     }
 
     /// <summary>
@@ -138,14 +196,28 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.NotFound)]
     public async Task<ActionResult> DeleteAsync(int id)
     {
-        var deleted = await _transactionRepository.DeleteAsync(id);
+        _logger.LogInformation($"Executing {nameof(DeleteAsync)}()");
 
-        if (!deleted)
+        try
         {
-            return NotFound($"Transaction with ID {id} not found");
-        }
+            var deleted = await _transactionRepository.DeleteAsync(id);
 
-        return NoContent();
+            if (!deleted)
+            {
+                return NotFound($"Transaction with ID {id} not found");
+            }
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while deleting transaction");
+            throw;
+        }
+        finally
+        {
+            _logger.LogInformation($"Executed {nameof(DeleteAsync)}()");
+        }
     }
 
     /// <summary>
