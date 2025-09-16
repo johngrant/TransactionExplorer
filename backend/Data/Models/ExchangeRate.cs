@@ -9,7 +9,7 @@ public class ExchangeRate
 
     [Required]
     [Column(TypeName = "date")]
-    public DateTime RecordDate { get; set; }
+    public DateOnly RecordDate { get; set; }
 
     [Required]
     [StringLength(100)]
@@ -21,7 +21,7 @@ public class ExchangeRate
 
     [Required]
     [Column(TypeName = "date")]
-    public DateTime EffectiveDate { get; set; }
+    public DateOnly EffectiveDate { get; set; }
 
     [Column(TypeName = "datetime2")]
     public DateTime CreatedAt { get; set; }

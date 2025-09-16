@@ -44,7 +44,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "Test Transaction 1",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -54,7 +54,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN002",
             Description = "Test Transaction 2",
-            TransactionDate = new DateTime(2025, 1, 16),
+            TransactionDate = new DateOnly(2025, 1, 16),
             PurchaseAmount = 250.75m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -90,7 +90,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "Transaction C",
-                TransactionDate = new DateTime(2025, 1, 17),
+                TransactionDate = new DateOnly(2025, 1, 17),
                 PurchaseAmount = 300.00m,
                 CreatedAt = DateTime.UtcNow.AddHours(-2),
                 UpdatedAt = DateTime.UtcNow.AddHours(-2)
@@ -99,7 +99,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction A",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.00m,
                 CreatedAt = DateTime.UtcNow.AddHours(-4),
                 UpdatedAt = DateTime.UtcNow.AddHours(-4)
@@ -108,7 +108,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "Transaction B",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 200.00m,
                 CreatedAt = DateTime.UtcNow.AddHours(-3),
                 UpdatedAt = DateTime.UtcNow.AddHours(-3)
@@ -143,7 +143,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "Test Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -160,7 +160,7 @@ public class TransactionRepositoryTests
         Assert.AreEqual(transaction.Id, result.Id);
         Assert.AreEqual("TXN001", result.CustomId);
         Assert.AreEqual("Test Transaction", result.Description);
-        Assert.AreEqual(new DateTime(2025, 1, 15), result.TransactionDate);
+        Assert.AreEqual(new DateOnly(2025, 1, 15), result.TransactionDate);
         Assert.AreEqual(100.50m, result.PurchaseAmount);
     }
 
@@ -189,7 +189,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "First Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -199,7 +199,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN002",
             Description = "Second Transaction",
-            TransactionDate = new DateTime(2025, 1, 16),
+            TransactionDate = new DateOnly(2025, 1, 16),
             PurchaseAmount = 250.75m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -230,7 +230,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "Test Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -246,7 +246,7 @@ public class TransactionRepositoryTests
         Assert.IsNotNull(result);
         Assert.AreEqual("TXN001", result.CustomId);
         Assert.AreEqual("Test Transaction", result.Description);
-        Assert.AreEqual(new DateTime(2025, 1, 15), result.TransactionDate);
+        Assert.AreEqual(new DateOnly(2025, 1, 15), result.TransactionDate);
         Assert.AreEqual(100.50m, result.PurchaseAmount);
     }
 
@@ -275,7 +275,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "First Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -285,7 +285,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN002",
             Description = "Second Transaction",
-            TransactionDate = new DateTime(2025, 1, 16),
+            TransactionDate = new DateOnly(2025, 1, 16),
             PurchaseAmount = 250.75m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -315,7 +315,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "New Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -348,7 +348,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "New Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m
         };
 
@@ -375,7 +375,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "Original Description",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow.AddHours(-1),
             UpdatedAt = DateTime.UtcNow.AddHours(-1)
@@ -389,7 +389,7 @@ public class TransactionRepositoryTests
             Id = originalTransaction.Id,
             CustomId = "TXN001",
             Description = "Updated Description",
-            TransactionDate = new DateTime(2025, 1, 16),
+            TransactionDate = new DateOnly(2025, 1, 16),
             PurchaseAmount = 200.75m,
             CreatedAt = originalTransaction.CreatedAt
         };
@@ -403,7 +403,7 @@ public class TransactionRepositoryTests
         // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual("Updated Description", result.Description);
-        Assert.AreEqual(new DateTime(2025, 1, 16), result.TransactionDate);
+        Assert.AreEqual(new DateOnly(2025, 1, 16), result.TransactionDate);
         Assert.AreEqual(200.75m, result.PurchaseAmount);
         Assert.AreEqual(originalTransaction.CreatedAt, result.CreatedAt);
         Assert.IsTrue(result.UpdatedAt >= beforeUpdate && result.UpdatedAt <= afterUpdate);
@@ -420,7 +420,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "To Be Deleted",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -465,7 +465,7 @@ public class TransactionRepositoryTests
         {
             CustomId = "TXN001",
             Description = "Test Transaction",
-            TransactionDate = new DateTime(2025, 1, 15),
+            TransactionDate = new DateOnly(2025, 1, 15),
             PurchaseAmount = 100.50m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -510,7 +510,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction 1",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.50m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -519,7 +519,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "Transaction 2",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 200.75m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -550,7 +550,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Low Amount",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 50.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -559,7 +559,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "High Amount",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 150.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -591,7 +591,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "Transaction C",
-                TransactionDate = new DateTime(2025, 1, 17),
+                TransactionDate = new DateOnly(2025, 1, 17),
                 PurchaseAmount = 300.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -600,7 +600,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction A",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -633,7 +633,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction 1",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -642,7 +642,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "Transaction 2",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 200.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -651,7 +651,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "Transaction 3",
-                TransactionDate = new DateTime(2025, 1, 17),
+                TransactionDate = new DateOnly(2025, 1, 17),
                 PurchaseAmount = 300.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -686,7 +686,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Low Amount Early",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 50.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -695,7 +695,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "High Amount Early",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 150.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -704,7 +704,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "High Amount Late",
-                TransactionDate = new DateTime(2025, 1, 20),
+                TransactionDate = new DateOnly(2025, 1, 20),
                 PurchaseAmount = 200.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -744,7 +744,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction 1",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.50m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -753,7 +753,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "Transaction 2",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 200.75m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -787,7 +787,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Low Amount",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 50.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -796,7 +796,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "High Amount",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 150.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -831,7 +831,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "Transaction C",
-                TransactionDate = new DateTime(2025, 1, 17),
+                TransactionDate = new DateOnly(2025, 1, 17),
                 PurchaseAmount = 300.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -840,7 +840,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction A",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -876,7 +876,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Transaction 1",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 100.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -885,7 +885,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "Transaction 2",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 200.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -894,7 +894,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "Transaction 3",
-                TransactionDate = new DateTime(2025, 1, 17),
+                TransactionDate = new DateOnly(2025, 1, 17),
                 PurchaseAmount = 300.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -932,7 +932,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN001",
                 Description = "Low Amount Early",
-                TransactionDate = new DateTime(2025, 1, 15),
+                TransactionDate = new DateOnly(2025, 1, 15),
                 PurchaseAmount = 50.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -941,7 +941,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN002",
                 Description = "High Amount Early",
-                TransactionDate = new DateTime(2025, 1, 16),
+                TransactionDate = new DateOnly(2025, 1, 16),
                 PurchaseAmount = 150.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -950,7 +950,7 @@ public class TransactionRepositoryTests
             {
                 CustomId = "TXN003",
                 Description = "High Amount Late",
-                TransactionDate = new DateTime(2025, 1, 20),
+                TransactionDate = new DateOnly(2025, 1, 20),
                 PurchaseAmount = 200.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

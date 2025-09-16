@@ -44,19 +44,19 @@ public class ExchangeRateRepositoryTests
 
         var exchangeRate1 = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.25m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow
         };
 
         var exchangeRate2 = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 16),
+            RecordDate = new DateOnly(2025, 1, 16),
             CountryCurrencyDesc = "Euro Zone-Euro",
             ExchangeRateValue = 0.85m,
-            EffectiveDate = new DateTime(2025, 1, 16),
+            EffectiveDate = new DateOnly(2025, 1, 16),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -90,10 +90,10 @@ public class ExchangeRateRepositoryTests
 
         var exchangeRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.25m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -108,7 +108,7 @@ public class ExchangeRateRepositoryTests
         Assert.AreEqual(exchangeRate.Id, result.Id);
         Assert.AreEqual("Canada-Dollar", result.CountryCurrencyDesc);
         Assert.AreEqual(1.25m, result.ExchangeRateValue);
-        Assert.AreEqual(new DateTime(2025, 1, 15), result.EffectiveDate);
+        Assert.AreEqual(new DateOnly(2025, 1, 15), result.EffectiveDate);
     }
 
     [TestMethod]
@@ -136,32 +136,32 @@ public class ExchangeRateRepositoryTests
         using var context = GetInMemoryDbContext();
         var repository = new ExchangeRateRepository(context);
 
-        var transactionDate = new DateTime(2025, 1, 20);
+        var transactionDate = new DateOnly(2025, 1, 20);
         var olderRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 10),
+            RecordDate = new DateOnly(2025, 1, 10),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.20m,
-            EffectiveDate = new DateTime(2025, 1, 10),
+            EffectiveDate = new DateOnly(2025, 1, 10),
             CreatedAt = DateTime.UtcNow.AddDays(-10)
         };
 
         var newerRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.25m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow.AddDays(-5)
         };
 
         // Future rate should be ignored
         var futureRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 25),
+            RecordDate = new DateOnly(2025, 1, 25),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.30m,
-            EffectiveDate = new DateTime(2025, 1, 25),
+            EffectiveDate = new DateOnly(2025, 1, 25),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -174,7 +174,7 @@ public class ExchangeRateRepositoryTests
         // Assert
         Assert.IsNotNull(result);
         Assert.AreEqual(1.25m, result.ExchangeRateValue);
-        Assert.AreEqual(new DateTime(2025, 1, 15), result.EffectiveDate);
+        Assert.AreEqual(new DateOnly(2025, 1, 15), result.EffectiveDate);
     }
 
     [TestMethod]
@@ -184,15 +184,15 @@ public class ExchangeRateRepositoryTests
         using var context = GetInMemoryDbContext();
         var repository = new ExchangeRateRepository(context);
 
-        var transactionDate = new DateTime(2025, 1, 20);
+        var transactionDate = new DateOnly(2025, 1, 20);
 
         // Add a rate for a different currency
         var exchangeRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Euro Zone-Euro",
             ExchangeRateValue = 0.85m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -213,14 +213,14 @@ public class ExchangeRateRepositoryTests
         using var context = GetInMemoryDbContext();
         var repository = new ExchangeRateRepository(context);
 
-        var transactionDate = new DateTime(2025, 1, 10);
+        var transactionDate = new DateOnly(2025, 1, 10);
 
         var futureRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.25m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -245,52 +245,52 @@ public class ExchangeRateRepositoryTests
         using var context = GetInMemoryDbContext();
         var repository = new ExchangeRateRepository(context);
 
-        var startDate = new DateTime(2025, 1, 10);
-        var endDate = new DateTime(2025, 1, 20);
+        var startDate = new DateOnly(2025, 1, 10);
+        var endDate = new DateOnly(2025, 1, 20);
 
         var rateBeforeRange = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 5),
+            RecordDate = new DateOnly(2025, 1, 5),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.20m,
-            EffectiveDate = new DateTime(2025, 1, 5),
+            EffectiveDate = new DateOnly(2025, 1, 5),
             CreatedAt = DateTime.UtcNow
         };
 
         var rateInRange1 = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.25m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow
         };
 
         var rateInRange2 = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 18),
+            RecordDate = new DateOnly(2025, 1, 18),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.27m,
-            EffectiveDate = new DateTime(2025, 1, 18),
+            EffectiveDate = new DateOnly(2025, 1, 18),
             CreatedAt = DateTime.UtcNow
         };
 
         var rateAfterRange = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 25),
+            RecordDate = new DateOnly(2025, 1, 25),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.30m,
-            EffectiveDate = new DateTime(2025, 1, 25),
+            EffectiveDate = new DateOnly(2025, 1, 25),
             CreatedAt = DateTime.UtcNow
         };
 
         // Different currency in range - should be excluded
         var differentCurrencyInRange = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 16),
+            RecordDate = new DateOnly(2025, 1, 16),
             CountryCurrencyDesc = "Euro Zone-Euro",
             ExchangeRateValue = 0.85m,
-            EffectiveDate = new DateTime(2025, 1, 16),
+            EffectiveDate = new DateOnly(2025, 1, 16),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -317,15 +317,15 @@ public class ExchangeRateRepositoryTests
         using var context = GetInMemoryDbContext();
         var repository = new ExchangeRateRepository(context);
 
-        var startDate = new DateTime(2025, 1, 10);
-        var endDate = new DateTime(2025, 1, 20);
+        var startDate = new DateOnly(2025, 1, 10);
+        var endDate = new DateOnly(2025, 1, 20);
 
         var rateOutsideRange = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 5),
+            RecordDate = new DateOnly(2025, 1, 5),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.20m,
-            EffectiveDate = new DateTime(2025, 1, 5),
+            EffectiveDate = new DateOnly(2025, 1, 5),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -353,10 +353,10 @@ public class ExchangeRateRepositoryTests
 
         var exchangeRate = new ExchangeRate
         {
-            RecordDate = new DateTime(2025, 1, 15),
+            RecordDate = new DateOnly(2025, 1, 15),
             CountryCurrencyDesc = "Canada-Dollar",
             ExchangeRateValue = 1.25m,
-            EffectiveDate = new DateTime(2025, 1, 15),
+            EffectiveDate = new DateOnly(2025, 1, 15),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -368,7 +368,7 @@ public class ExchangeRateRepositoryTests
         Assert.IsTrue(result.Id > 0);
         Assert.AreEqual("Canada-Dollar", result.CountryCurrencyDesc);
         Assert.AreEqual(1.25m, result.ExchangeRateValue);
-        Assert.AreEqual(new DateTime(2025, 1, 15), result.EffectiveDate);
+        Assert.AreEqual(new DateOnly(2025, 1, 15), result.EffectiveDate);
 
         // Verify it was saved to database
         var savedRate = await context.ExchangeRates.FindAsync(result.Id);
@@ -391,26 +391,26 @@ public class ExchangeRateRepositoryTests
         {
             new ExchangeRate
             {
-                RecordDate = new DateTime(2025, 1, 15),
+                RecordDate = new DateOnly(2025, 1, 15),
                 CountryCurrencyDesc = "Canada-Dollar",
                 ExchangeRateValue = 1.25m,
-                EffectiveDate = new DateTime(2025, 1, 15),
+                EffectiveDate = new DateOnly(2025, 1, 15),
                 CreatedAt = DateTime.UtcNow
             },
             new ExchangeRate
             {
-                RecordDate = new DateTime(2025, 1, 15),
+                RecordDate = new DateOnly(2025, 1, 15),
                 CountryCurrencyDesc = "Euro Zone-Euro",
                 ExchangeRateValue = 0.85m,
-                EffectiveDate = new DateTime(2025, 1, 15),
+                EffectiveDate = new DateOnly(2025, 1, 15),
                 CreatedAt = DateTime.UtcNow
             },
             new ExchangeRate
             {
-                RecordDate = new DateTime(2025, 1, 15),
+                RecordDate = new DateOnly(2025, 1, 15),
                 CountryCurrencyDesc = "United Kingdom-Pound",
                 ExchangeRateValue = 0.75m,
-                EffectiveDate = new DateTime(2025, 1, 15),
+                EffectiveDate = new DateOnly(2025, 1, 15),
                 CreatedAt = DateTime.UtcNow
             }
         };

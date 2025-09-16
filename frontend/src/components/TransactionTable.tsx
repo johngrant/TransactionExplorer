@@ -1,6 +1,7 @@
 import { Loader2, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
 import { Transaction } from "../services/api";
+import { formatTransactionDate } from "../utils/dateUtils";
 import { TransactionDetailsPopup } from "./TransactionDetailsPopup";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -168,7 +169,7 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
                     <TableCell className="font-mono">{transaction.id}</TableCell>
                     <TableCell className="font-mono">{transaction.customId}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
-                    <TableCell>{new Date(transaction.transactionDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{formatTransactionDate(transaction.transactionDate)}</TableCell>
                     <TableCell className="text-right">${transaction.purchaseAmount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))

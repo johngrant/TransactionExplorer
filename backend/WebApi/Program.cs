@@ -1,9 +1,21 @@
 using Data.Extensions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using WebApi.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Configure DateOnly serialization to return just the date part
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+        // Add DateOnly converter to serialize as YYYY-MM-DD instead of datetime
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+    });
 
 // Add Data Services
 builder.Services.AddDataServices(builder.Configuration);

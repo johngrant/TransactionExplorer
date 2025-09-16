@@ -89,8 +89,8 @@ export function TransactionForm({ onAddTransaction, existingIds }: TransactionFo
     try {
       const amount = Math.round(parseFloat(formData.amount) * 100) / 100; // Round to nearest cent
 
-      // Format date as ISO string for the API
-      const transactionDate = new Date(formData.date).toISOString();
+      // Send only the date part (YYYY-MM-DD) to avoid timezone issues
+      const transactionDate = formData.date; // formData.date is already in YYYY-MM-DD format from date input
 
       const newTransaction = await ApiService.createTransaction({
         customId: formData.customId,

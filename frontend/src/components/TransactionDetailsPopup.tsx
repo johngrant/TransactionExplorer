@@ -1,6 +1,7 @@
 import { Calendar, Clock, DollarSign, FileText, Hash, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ApiService, Transaction } from "../services/api";
+import { formatDateTime, formatTransactionDateDetailed } from "../utils/dateUtils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
@@ -90,25 +91,6 @@ export function TransactionDetailsPopup({
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
-
-    const formatDateTime = (dateString: string) => {
-        return new Date(dateString).toLocaleString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
-
     const renderContent = () => {
         if (loading) {
             return (
@@ -175,7 +157,7 @@ export function TransactionDetailsPopup({
                         <Calendar className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1">
                             <p className="font-medium text-sm text-muted-foreground mb-1">Transaction Date</p>
-                            <p className="text-foreground">{formatDate(transaction.transactionDate)}</p>
+                            <p className="text-foreground">{formatTransactionDateDetailed(transaction.transactionDate)}</p>
                         </div>
                     </div>
 

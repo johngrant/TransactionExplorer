@@ -23,7 +23,7 @@ public class ExchangeRateRepository : IExchangeRateRepository
         return await _context.ExchangeRates.FindAsync(id);
     }
 
-    public async Task<ExchangeRate?> GetLatestRateAsync(string countryCurrencyDesc, DateTime transactionDate)
+    public async Task<ExchangeRate?> GetLatestRateAsync(string countryCurrencyDesc, DateOnly transactionDate)
     {
         return await _context.ExchangeRates
             .Where(r => r.CountryCurrencyDesc == countryCurrencyDesc && r.EffectiveDate <= transactionDate)
@@ -31,7 +31,7 @@ public class ExchangeRateRepository : IExchangeRateRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ExchangeRate>> GetRatesForDateRangeAsync(string countryCurrencyDesc, DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<ExchangeRate>> GetRatesForDateRangeAsync(string countryCurrencyDesc, DateOnly startDate, DateOnly endDate)
     {
         return await _context.ExchangeRates
             .Where(r => r.CountryCurrencyDesc == countryCurrencyDesc &&

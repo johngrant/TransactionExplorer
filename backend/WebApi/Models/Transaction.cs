@@ -16,7 +16,7 @@ public class Transaction
     public string Description { get; set; } = string.Empty;
 
     [Required]
-    public DateTime TransactionDate { get; set; }
+    public DateOnly TransactionDate { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(19,2)")]

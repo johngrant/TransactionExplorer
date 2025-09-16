@@ -57,7 +57,7 @@ public class TransactionsControllerTests
         {
             CustomId = "TEST-001",
             Description = "Test transaction",
-            TransactionDate = DateTime.Now,
+            TransactionDate = DateOnly.FromDateTime(DateTime.Now),
             PurchaseAmount = 100.50m
         };
 
@@ -118,7 +118,7 @@ public class TransactionsControllerTests
             Id = 1,
             CustomId = "TEST-002",
             Description = "Test transaction for retrieval",
-            TransactionDate = DateTime.Now.Date,
+            TransactionDate = DateOnly.FromDateTime(DateTime.Now),
             PurchaseAmount = 75.25m,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -153,7 +153,7 @@ public class TransactionsControllerTests
         {
             CustomId = "", // Invalid - required field
             Description = "Test transaction",
-            TransactionDate = DateTime.Now,
+            TransactionDate = DateOnly.FromDateTime(DateTime.Now),
             PurchaseAmount = 100.50m
         };
 
@@ -176,7 +176,7 @@ public class TransactionsControllerTests
         {
             CustomId = "TEST-003",
             Description = "Test transaction",
-            TransactionDate = DateTime.Now,
+            TransactionDate = DateOnly.FromDateTime(DateTime.Now),
             PurchaseAmount = 0m // Invalid - must be greater than 0
         };
 
@@ -202,7 +202,7 @@ public class TransactionsControllerTests
                 Id = 1,
                 CustomId = "TEST-004",
                 Description = "First transaction",
-                TransactionDate = DateTime.Now.Date,
+                TransactionDate = DateOnly.FromDateTime(DateTime.Now),
                 PurchaseAmount = 50.00m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -212,7 +212,7 @@ public class TransactionsControllerTests
                 Id = 2,
                 CustomId = "TEST-005",
                 Description = "Second transaction",
-                TransactionDate = DateTime.Now.AddDays(-1).Date,
+                TransactionDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
                 PurchaseAmount = 125.75m,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -250,7 +250,7 @@ public class TransactionsControllerTests
         {
             CustomId = "TEST-006",
             Description = "Test transaction with timestamps",
-            TransactionDate = DateTime.Now.Date,
+            TransactionDate = DateOnly.FromDateTime(DateTime.Now),
             PurchaseAmount = 99.99m
         };
 
@@ -308,7 +308,7 @@ public class TransactionsControllerTests
         {
             CustomId = "TEST-007",
             Description = "Test route values",
-            TransactionDate = DateTime.Now,
+            TransactionDate = DateOnly.FromDateTime(DateTime.Now),
             PurchaseAmount = 150.00m
         };
 
@@ -351,8 +351,8 @@ public class TransactionsControllerTests
         var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 1, PageSize = 2 };
         var dataTransactions = new List<Data.Models.Transaction>
         {
-            new() { Id = 1, CustomId = "T1", Description = "Transaction 1", TransactionDate = DateTime.Now.AddDays(-2), PurchaseAmount = 100m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new() { Id = 2, CustomId = "T2", Description = "Transaction 2", TransactionDate = DateTime.Now.AddDays(-1), PurchaseAmount = 200m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+            new() { Id = 1, CustomId = "T1", Description = "Transaction 1", TransactionDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-2)), PurchaseAmount = 100m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new() { Id = 2, CustomId = "T2", Description = "Transaction 2", TransactionDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), PurchaseAmount = 200m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         };
 
         _mockTransactionRepository
@@ -392,8 +392,8 @@ public class TransactionsControllerTests
         var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 2, PageSize = 2 };
         var dataTransactions = new List<Data.Models.Transaction>
         {
-            new() { Id = 3, CustomId = "T3", Description = "Transaction 3", TransactionDate = DateTime.Now, PurchaseAmount = 300m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new() { Id = 4, CustomId = "T4", Description = "Transaction 4", TransactionDate = DateTime.Now, PurchaseAmount = 400m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+            new() { Id = 3, CustomId = "T3", Description = "Transaction 3", TransactionDate = DateOnly.FromDateTime(DateTime.Now), PurchaseAmount = 300m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new() { Id = 4, CustomId = "T4", Description = "Transaction 4", TransactionDate = DateOnly.FromDateTime(DateTime.Now), PurchaseAmount = 400m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         };
 
         _mockTransactionRepository
@@ -433,7 +433,7 @@ public class TransactionsControllerTests
         var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 3, PageSize = 2 };
         var dataTransactions = new List<Data.Models.Transaction>
         {
-            new() { Id = 5, CustomId = "T5", Description = "Transaction 5", TransactionDate = DateTime.Now, PurchaseAmount = 500m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+            new() { Id = 5, CustomId = "T5", Description = "Transaction 5", TransactionDate = DateOnly.FromDateTime(DateTime.Now), PurchaseAmount = 500m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         };
 
         _mockTransactionRepository
@@ -509,8 +509,8 @@ public class TransactionsControllerTests
         var paginationParams = new WebApi.Models.PaginationParameters { PageNumber = 1, PageSize = 10 };
         var dataTransactions = new List<Data.Models.Transaction>
         {
-            new() { Id = 2, CustomId = "T2", Description = "Transaction 2", TransactionDate = DateTime.Now, PurchaseAmount = 200m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new() { Id = 1, CustomId = "T1", Description = "Transaction 1", TransactionDate = DateTime.Now.AddDays(-1), PurchaseAmount = 100m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+            new() { Id = 2, CustomId = "T2", Description = "Transaction 2", TransactionDate = DateOnly.FromDateTime(DateTime.Now), PurchaseAmount = 200m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            new() { Id = 1, CustomId = "T1", Description = "Transaction 1", TransactionDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), PurchaseAmount = 100m, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
         };
 
         _mockTransactionRepository
