@@ -106,27 +106,35 @@ public class ExchangeRateControllerTests
     }
 
     [TestMethod]
-    public async Task GetExchangeRatesForPeriod_ThrowsArgumentException_WhenCurrencyDescIsEmpty()
+    public async Task GetExchangeRatesForPeriod_ReturnsBadRequest_WhenCurrencyDescIsEmpty()
     {
         // Arrange
         var transactionDate = new DateOnly(2024, 6, 15);
         var emptyCurrencyDesc = "";
 
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _controller.GetExchangeRatesForPeriod(transactionDate, emptyCurrencyDesc));
+        // Act
+        var result = await _controller.GetExchangeRatesForPeriod(transactionDate, emptyCurrencyDesc);
+
+        // Assert
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        Assert.AreEqual("Currency description cannot be null or empty", badRequestResult!.Value);
     }
 
     [TestMethod]
-    public async Task GetExchangeRatesForPeriod_ThrowsArgumentException_WhenCurrencyDescIsNull()
+    public async Task GetExchangeRatesForPeriod_ReturnsBadRequest_WhenCurrencyDescIsNull()
     {
         // Arrange
         var transactionDate = new DateOnly(2024, 6, 15);
         string nullCurrencyDesc = null!;
 
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _controller.GetExchangeRatesForPeriod(transactionDate, nullCurrencyDesc));
+        // Act
+        var result = await _controller.GetExchangeRatesForPeriod(transactionDate, nullCurrencyDesc);
+
+        // Assert
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        Assert.AreEqual("Currency description cannot be null or empty", badRequestResult!.Value);
     }
 
     [TestMethod]
@@ -283,15 +291,19 @@ public class ExchangeRateControllerTests
     }
 
     [TestMethod]
-    public async Task GetLatestExchangeRate_ThrowsArgumentException_WhenCurrencyDescIsEmpty()
+    public async Task GetLatestExchangeRate_ReturnsBadRequest_WhenCurrencyDescIsEmpty()
     {
         // Arrange
         var transactionDate = new DateOnly(2024, 6, 15);
         var emptyCurrencyDesc = "";
 
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _controller.GetLatestExchangeRate(transactionDate, emptyCurrencyDesc));
+        // Act
+        var result = await _controller.GetLatestExchangeRate(transactionDate, emptyCurrencyDesc);
+
+        // Assert
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        Assert.AreEqual("Currency description cannot be null or empty", badRequestResult!.Value);
     }
 
     [TestMethod]
@@ -366,42 +378,54 @@ public class ExchangeRateControllerTests
     }
 
     [TestMethod]
-    public async Task Convert_ThrowsArgumentException_WhenAmountIsNegative()
+    public async Task Convert_ReturnsBadRequest_WhenAmountIsNegative()
     {
         // Arrange
         var transactionDate = new DateOnly(2024, 6, 15);
         var negativeAmount = -10.00m;
         var countryCurrencyDesc = "Canada-Dollar";
 
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _controller.Convert(transactionDate, negativeAmount, countryCurrencyDesc));
+        // Act
+        var result = await _controller.Convert(transactionDate, negativeAmount, countryCurrencyDesc);
+
+        // Assert
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        Assert.AreEqual("Amount must be a positive value", badRequestResult!.Value);
     }
 
     [TestMethod]
-    public async Task Convert_ThrowsArgumentException_WhenAmountIsZero()
+    public async Task Convert_ReturnsBadRequest_WhenAmountIsZero()
     {
         // Arrange
         var transactionDate = new DateOnly(2024, 6, 15);
         var zeroAmount = 0.00m;
         var countryCurrencyDesc = "Canada-Dollar";
 
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _controller.Convert(transactionDate, zeroAmount, countryCurrencyDesc));
+        // Act
+        var result = await _controller.Convert(transactionDate, zeroAmount, countryCurrencyDesc);
+
+        // Assert
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        Assert.AreEqual("Amount must be a positive value", badRequestResult!.Value);
     }
 
     [TestMethod]
-    public async Task Convert_ThrowsArgumentException_WhenCurrencyDescIsEmpty()
+    public async Task Convert_ReturnsBadRequest_WhenCurrencyDescIsEmpty()
     {
         // Arrange
         var transactionDate = new DateOnly(2024, 6, 15);
         var amountUsd = 100.00m;
         var emptyCurrencyDesc = "";
 
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
-            () => _controller.Convert(transactionDate, amountUsd, emptyCurrencyDesc));
+        // Act
+        var result = await _controller.Convert(transactionDate, amountUsd, emptyCurrencyDesc);
+
+        // Assert
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        Assert.AreEqual("Currency description cannot be null or empty", badRequestResult!.Value);
     }
 
     [TestMethod]

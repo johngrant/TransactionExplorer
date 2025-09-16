@@ -25,6 +25,7 @@ public class ExchangeRateController : ControllerBase
     /// </summary>
     /// <param name="transactionDate">The transaction date</param>
     /// <param name="countryCurrencyDesc">The currency description (e.g., "Canada-Dollar")</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Exchange rates for the specified period, sorted by date descending</returns>
     /// <response code="200">Returns the exchange rates for the specified period</response>
     /// <response code="400">If the currency description is invalid</response>
@@ -37,7 +38,8 @@ public class ExchangeRateController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
     public async Task<ActionResult<TreasuryApiResponse>> GetExchangeRatesForPeriod(
         [FromQuery] DateOnly transactionDate,
-        [FromQuery] string countryCurrencyDesc)
+        [FromQuery] string countryCurrencyDesc,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
         {
@@ -53,7 +55,8 @@ public class ExchangeRateController : ControllerBase
             var response = await _treasuryClient.GetExchangeRatesForCurrencyAsync(
                 countryCurrencyDesc,
                 startDate,
-                endDate);
+                endDate,
+                cancellationToken);
 
             if (response.Data == null || !response.Data.Any())
             {
@@ -75,6 +78,7 @@ public class ExchangeRateController : ControllerBase
     /// </summary>
     /// <param name="transactionDate">The transaction date to find the latest rate for</param>
     /// <param name="countryCurrencyDesc">The currency description (e.g., "Canada-Dollar")</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The latest exchange rate for the specified currency</returns>
     /// <response code="200">Returns the latest exchange rate for the specified currency</response>
     /// <response code="400">If the currency description is invalid</response>
@@ -87,7 +91,8 @@ public class ExchangeRateController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
     public async Task<ActionResult<TreasuryApiResponse>> GetLatestExchangeRate(
         [FromQuery] DateOnly transactionDate,
-        [FromQuery] string countryCurrencyDesc)
+        [FromQuery] string countryCurrencyDesc,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
         {
@@ -98,7 +103,8 @@ public class ExchangeRateController : ControllerBase
         {
             var response = await _treasuryClient.GetLatestExchangeRateAsync(
                 countryCurrencyDesc,
-                transactionDate);
+                transactionDate,
+                cancellationToken);
 
             if (response.Data == null || !response.Data.Any())
             {
@@ -122,6 +128,7 @@ public class ExchangeRateController : ControllerBase
     /// <param name="transactionDate">The transaction date</param>
     /// <param name="amountUsd">The amount in USD to convert (must be positive)</param>
     /// <param name="countryCurrencyDesc">The target currency description (e.g., "Canada-Dollar")</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Conversion result with original amount, exchange rate, and converted amount</returns>
     /// <response code="200">Returns the currency conversion result</response>
     /// <response code="400">If the amount or currency description is invalid</response>
@@ -135,7 +142,8 @@ public class ExchangeRateController : ControllerBase
     public async Task<ActionResult<CurrencyConversionResponse>> Convert(
         [FromQuery] DateOnly transactionDate,
         [FromQuery] decimal amountUsd,
-        [FromQuery] string countryCurrencyDesc)
+        [FromQuery] string countryCurrencyDesc,
+        CancellationToken cancellationToken = default)
     {
         if (amountUsd <= 0)
         {
@@ -151,7 +159,8 @@ public class ExchangeRateController : ControllerBase
         {
             var response = await _treasuryClient.GetLatestExchangeRateAsync(
                 countryCurrencyDesc,
-                transactionDate);
+                transactionDate,
+                cancellationToken);
 
             if (response.Data == null || !response.Data.Any())
             {
