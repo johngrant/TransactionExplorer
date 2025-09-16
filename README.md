@@ -94,11 +94,19 @@ This solution leverages **Docker Desktop** for consistent development and deploy
 - Cross-platform compatibility (Windows, macOS, Linux)
 
 ### Testing
-The project includes comprehensive unit testing:
+The project includes comprehensive unit testing across both frontend and backend:
+
+#### Backend Testing
 - **MSTest Framework**: Microsoft's testing framework for .NET
 - **Moq**: Mocking framework for isolating dependencies
 - **Entity Framework InMemory**: In-memory database for testing
 - Run tests: `dotnet test` from the backend directory
+
+#### Frontend Testing
+- **Jest**: JavaScript testing framework for unit and integration tests
+- **React Testing Library**: Testing utilities for React components with focus on user interactions
+- **JSDOM**: Browser environment simulation for testing React components
+- Run tests: `npm test` from the frontend directory
 
 ### Core Technologies
 
@@ -147,10 +155,11 @@ The frontend is fully responsive and optimized for:
 
 ## 🧪 Running Tests
 
-Execute the unit test suite:
+### Backend Tests
+Execute the backend unit test suite:
 
 ```bash
-# Run all tests
+# Run all backend tests
 cd backend
 dotnet test
 
@@ -161,13 +170,36 @@ dotnet test --logger "console;verbosity=detailed"
 dotnet test Tests/Tests.csproj
 ```
 
-Test coverage includes:
+Backend test coverage includes:
 - Controller endpoint testing
 - Repository data access testing
 - Exchange rate service testing
 - API client retry logic testing
 
 <img width="615" height="688" alt="image" src="https://github.com/user-attachments/assets/812ba007-aca6-47c2-aabe-a683f1bac1dc" />
+
+
+### Frontend Tests
+Execute the frontend test suite using Jest and React Testing Library:
+
+```bash
+# Run all frontend tests
+cd frontend
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+Frontend test coverage includes:
+- Component rendering and behavior testing
+- Form validation and submission testing
+- User interaction testing with React Testing Library
+- API integration testing with mocked responses
+
 
 
 ## 📋 Requirements Implementation
@@ -239,5 +271,5 @@ For detailed deployment instructions, see the respective documentation files in 
 ## 🚀 Future Improvements
 
 - **Containerize the frontend**: Add Docker support for the React frontend to enable full containerization of the entire application stack
-- **Add React Testing Library**: Implement comprehensive component testing with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for better frontend test coverage
+- **Expand frontend test coverage**: Add more comprehensive component tests using Jest and React Testing Library, including edge cases and complex user interactions
 - **Add Cypress for automated browser testing**: Integrate [Cypress](https://www.cypress.io/) for end-to-end testing and automated browser testing to ensure UI functionality across different environments
