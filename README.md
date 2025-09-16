@@ -200,6 +200,7 @@ Frontend test coverage includes:
 - User interaction testing with React Testing Library
 - API integration testing with mocked responses
 
+<img width="389" height="112" alt="image" src="https://github.com/user-attachments/assets/f1989245-ef8f-4007-a99a-76c0fb5e5a1a" />
 
 
 ## 📋 Requirements Implementation
