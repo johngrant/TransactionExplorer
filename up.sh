@@ -65,6 +65,17 @@ else
     exit 1
 fi
 
+# Start frontend
+cd ../frontend
+print_status "Starting frontend..."
+echo "----------------------------------------"
+if ./up.sh; then
+    print_success "Frontend started successfully ✓"
+else
+    print_error "Failed to start frontend"
+    exit 1
+fi
+
 # Return to root directory
 cd ..
 
@@ -74,6 +85,7 @@ echo ""
 echo "Services:"
 echo "  📊 Database:    localhost:1433"
 echo "  🚀 Backend API: http://localhost:5070"
+echo "  🌐 Frontend:    http://localhost:3000"
 echo ""
 echo "To stop the system: ./down.sh"
 echo "To check status:   docker ps --filter name=transaction-explorer"

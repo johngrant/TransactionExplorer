@@ -1,0 +1,18 @@
+# Development version with hot reload
+services:
+  transaction-explorer-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev # Use dev stage for development with hot reload
+    container_name: transaction-explorer-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:5070
+    volumes:
+      - .:/app # Mount source code for hot reload
+      - /app/node_modules # Use container's node_modules
+    restart: unless-stopped
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

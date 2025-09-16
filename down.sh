@@ -31,10 +31,20 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Stop backend first
+# Stop frontend first
+print_status "Stopping frontend..."
+echo "----------------------------------------"
+cd frontend
+if ./down.sh; then
+    print_success "Frontend stopped successfully ✓"
+else
+    print_warning "Frontend may have already been stopped or failed to stop"
+fi
+
+# Stop backend
+cd ../backend
 print_status "Stopping backend..."
 echo "----------------------------------------"
-cd backend
 if ./down.sh; then
     print_success "Backend stopped successfully ✓"
 else
