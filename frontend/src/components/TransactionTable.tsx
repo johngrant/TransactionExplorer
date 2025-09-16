@@ -146,8 +146,8 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => handleRowClick(transaction)}
                   >
-                    <TableCell className="font-mono">{transaction.id}</TableCell>
-                    <TableCell className="font-mono">{transaction.customId}</TableCell>
+                    <TableCell>{transaction.id}</TableCell>
+                    <TableCell>{transaction.customId}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>{formatTransactionDate(transaction.transactionDate)}</TableCell>
                     <TableCell className="text-right">${transaction.purchaseAmount.toFixed(2)}</TableCell>
