@@ -44,7 +44,7 @@ transaction-explorer/
 #### Backend API
 ```bash
 cd backend
-./up.sh     # Start backend with database
+./up.sh     # Start backend
 ./down.sh   # Stop backend
 ```
 - Backend API: http://localhost:5070
