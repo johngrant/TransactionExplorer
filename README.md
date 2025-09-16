@@ -38,7 +38,7 @@ transaction-explorer/
 
 ### Full System (Recommended)
 ```bash
-./up.sh     # Start entire system (database + backend + frontend)
+./up.sh     # Start entire system (database + backend)
 cd frontend
 ./start.sh
 ```
