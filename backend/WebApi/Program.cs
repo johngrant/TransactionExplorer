@@ -3,6 +3,7 @@ using Services.Extensions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WebApi.Converters;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +40,43 @@ builder.Services.AddCors(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Add Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Transaction Explorer API",
+        Version = "v1",
+        Description = "API for managing transactions and exchange rates",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Transaction Explorer Support",
+            Email = "support@example.com"
+        }
+    });
+
+    // Include XML comments for better documentation
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Transaction Explorer API V1");
+        c.RoutePrefix = "swagger"; // Set Swagger UI at /swagger
+    });
 }
 
 // Enable CORS
@@ -71,6 +103,11 @@ app.MapGet("/", () =>
         service = "WebApi",
         version = "1.0.0",
         timestamp = DateTime.UtcNow,
+        documentation = new
+        {
+            swagger = "/swagger",
+            openapi = "/swagger/v1/swagger.json"
+        },
         endpoints = new
         {
             health = "/health",

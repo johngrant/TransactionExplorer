@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 using Data.Repositories;
+using System.Net;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Tags("Transactions")]
 public class TransactionsController : ControllerBase
 {
     private readonly ITransactionRepository _transactionRepository;
@@ -19,7 +22,9 @@ public class TransactionsController : ControllerBase
     /// Get all transactions
     /// </summary>
     /// <returns>List of all transactions</returns>
+    /// <response code="200">Returns the list of transactions</response>
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<Transaction>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<IEnumerable<Transaction>>> GetAllAsync()
     {
         var dataTransactions = await _transactionRepository.GetAllAsync();
@@ -32,7 +37,11 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="paginationParameters">Pagination parameters</param>
     /// <returns>Paged list of transactions</returns>
+    /// <response code="200">Returns the paged list of transactions</response>
+    /// <response code="400">If pagination parameters are invalid</response>
     [HttpGet("paged")]
+    [ProducesResponseType(typeof(PagedResponse<Transaction>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     public async Task<ActionResult<PagedResponse<Transaction>>> GetAllAsync([FromQuery] PaginationParameters paginationParameters)
     {
         // Calculate skip value (0-based indexing)
@@ -66,7 +75,11 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="id">The transaction ID</param>
     /// <returns>The transaction if found</returns>
+    /// <response code="200">Returns the requested transaction</response>
+    /// <response code="404">If the transaction is not found</response>
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(Transaction), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
     public async Task<ActionResult<Transaction>> GetAsync(int id)
     {
         var dataTransaction = await _transactionRepository.GetByIdAsync(id);
@@ -85,7 +98,11 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="request">The transaction creation request</param>
     /// <returns>The created transaction</returns>
+    /// <response code="201">Returns the newly created transaction</response>
+    /// <response code="400">If the request is invalid</response>
     [HttpPost]
+    [ProducesResponseType(typeof(Transaction), (int)HttpStatusCode.Created)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     public async Task<ActionResult<Transaction>> CreateAsync([FromBody] CreateTransactionRequest request)
     {
         if (!ModelState.IsValid)
@@ -114,7 +131,11 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="id">The transaction ID</param>
     /// <returns>No content if successful, NotFound if transaction doesn't exist</returns>
+    /// <response code="204">If the transaction was successfully deleted</response>
+    /// <response code="404">If the transaction is not found</response>
     [HttpDelete("{id:int}")]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
     public async Task<ActionResult> DeleteAsync(int id)
     {
         var deleted = await _transactionRepository.DeleteAsync(id);

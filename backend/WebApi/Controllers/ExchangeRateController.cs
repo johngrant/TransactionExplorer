@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using Services.Models;
 using WebApi.Models;
+using System.Net;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
+[Tags("Exchange Rates")]
 public class ExchangeRateController : ControllerBase
 {
     private readonly ITreasuryExchangeRateClient _treasuryClient;
@@ -23,7 +26,15 @@ public class ExchangeRateController : ControllerBase
     /// <param name="transactionDate">The transaction date</param>
     /// <param name="countryCurrencyDesc">The currency description (e.g., "Canada-Dollar")</param>
     /// <returns>Exchange rates for the specified period, sorted by date descending</returns>
+    /// <response code="200">Returns the exchange rates for the specified period</response>
+    /// <response code="400">If the currency description is invalid</response>
+    /// <response code="404">If no exchange rates are found for the specified criteria</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpGet("rates")]
+    [ProducesResponseType(typeof(TreasuryApiResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
     public async Task<ActionResult<TreasuryApiResponse>> GetExchangeRatesForPeriod(
         [FromQuery] DateOnly transactionDate,
         [FromQuery] string countryCurrencyDesc)
@@ -65,7 +76,15 @@ public class ExchangeRateController : ControllerBase
     /// <param name="transactionDate">The transaction date to find the latest rate for</param>
     /// <param name="countryCurrencyDesc">The currency description (e.g., "Canada-Dollar")</param>
     /// <returns>The latest exchange rate for the specified currency</returns>
+    /// <response code="200">Returns the latest exchange rate for the specified currency</response>
+    /// <response code="400">If the currency description is invalid</response>
+    /// <response code="404">If no exchange rate is found for the specified criteria</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpGet("latest")]
+    [ProducesResponseType(typeof(TreasuryApiResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
     public async Task<ActionResult<TreasuryApiResponse>> GetLatestExchangeRate(
         [FromQuery] DateOnly transactionDate,
         [FromQuery] string countryCurrencyDesc)
@@ -104,7 +123,15 @@ public class ExchangeRateController : ControllerBase
     /// <param name="amountUsd">The amount in USD to convert (must be positive)</param>
     /// <param name="countryCurrencyDesc">The target currency description (e.g., "Canada-Dollar")</param>
     /// <returns>Conversion result with original amount, exchange rate, and converted amount</returns>
+    /// <response code="200">Returns the currency conversion result</response>
+    /// <response code="400">If the amount or currency description is invalid</response>
+    /// <response code="404">If no exchange rate is found within 6 months of the transaction date</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpGet("convert")]
+    [ProducesResponseType(typeof(CurrencyConversionResponse), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
     public async Task<ActionResult<CurrencyConversionResponse>> Convert(
         [FromQuery] DateOnly transactionDate,
         [FromQuery] decimal amountUsd,
