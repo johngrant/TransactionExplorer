@@ -2,6 +2,9 @@
 
 A comprehensive transaction management system with API backend, database integration, and responsive web frontend. This solution provides currency conversion capabilities with real-time exchange rates from the U.S. Treasury API, featuring a robust .NET Core backend and modern React frontend.
 
+![2025-09-16 11 59 39](https://github.com/user-attachments/assets/c98eaef2-9b31-4139-a480-626c77d3241a)
+
+
 ## 🏗️ Project Structure
 
 ```
