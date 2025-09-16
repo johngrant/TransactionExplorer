@@ -1,5 +1,8 @@
+using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
 using RestSharp;
 using Services.Configuration;
 using Services.Interfaces;
@@ -8,18 +11,49 @@ using Services.Models;
 namespace Services.Clients;
 
 /// <summary>
-/// Client for Treasury Reporting Rates of Exchange API
+/// Client for Treasury Reporting Rates of Exchange API with retry policies
 /// </summary>
 public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
 {
-    private readonly RestClient _restClient;
+    private readonly IRestClientWrapper _restClientWrapper;
     private readonly TreasuryExchangeRateOptions _options;
+    private readonly ILogger<TreasuryExchangeRateClient> _logger;
+    private readonly ResiliencePipeline<IRestResponseWrapper> _retryPipeline;
     private const string Endpoint = "v1/accounting/od/rates_of_exchange";
 
-    public TreasuryExchangeRateClient(RestClient restClient, IOptions<TreasuryExchangeRateOptions> options)
+    public TreasuryExchangeRateClient(
+        IRestClientWrapper restClientWrapper, 
+        IOptions<TreasuryExchangeRateOptions> options,
+        ILogger<TreasuryExchangeRateClient> logger)
     {
-        _restClient = restClient ?? throw new ArgumentNullException(nameof(restClient));
+        _restClientWrapper = restClientWrapper ?? throw new ArgumentNullException(nameof(restClientWrapper));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        
+        // Configure retry policy
+        _retryPipeline = new ResiliencePipelineBuilder<IRestResponseWrapper>()
+            .AddRetry(new Polly.Retry.RetryStrategyOptions<IRestResponseWrapper>
+            {
+                ShouldHandle = new PredicateBuilder<IRestResponseWrapper>()
+                    .Handle<HttpRequestException>()
+                    .Handle<TaskCanceledException>()
+                    .HandleResult(response => 
+                        !response.IsSuccessful && 
+                        response.StatusCode != HttpStatusCode.NotFound && // Don't retry 404s
+                        response.StatusCode != HttpStatusCode.BadRequest), // Don't retry bad requests
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                UseJitter = true,
+                OnRetry = args =>
+                {
+                    _logger.LogWarning("Treasury API retry attempt {AttemptNumber} after {Delay}ms. Outcome: {Outcome}", 
+                        args.AttemptNumber, 
+                        args.RetryDelay.TotalMilliseconds,
+                        args.Outcome);
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
     }
 
     /// <inheritdoc />
@@ -45,29 +79,37 @@ public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
         request.AddQueryParameter("page[number]", pageNumber.ToString());
         request.AddQueryParameter("page[size]", pageSize.ToString());
 
-        Console.WriteLine($"Treasury API Request: {_restClient.Options.BaseUrl}/{request.Resource}");
+        _logger.LogDebug("Treasury API Request: {BaseUrl}/{Resource}", _restClientWrapper.BaseUrl, request.Resource);
 
-        var response = await _restClient.ExecuteAsync<TreasuryApiResponse>(request, cancellationToken);
+        // Execute with retry policy
+        var response = await _retryPipeline.ExecuteAsync(async (cancellationToken) =>
+        {
+            return await _restClientWrapper.ExecuteAsync(request, cancellationToken);
+        }, cancellationToken);
 
-        Console.WriteLine($"Response Status: {response.StatusCode}");
+        _logger.LogDebug("Response Status: {StatusCode}", response.StatusCode);
 
         // Handle 404 as empty result rather than throwing exception
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            Console.WriteLine("Returning empty response due to 404");
+            _logger.LogInformation("No exchange rate data found (404) - returning empty response");
             return new TreasuryApiResponse();
         }
 
         if (!response.IsSuccessful)
         {
+            _logger.LogError("Treasury API request failed with status {StatusCode}: {ErrorMessage}", 
+                response.StatusCode, response.ErrorMessage);
             throw new HttpRequestException($"Request failed with status {response.StatusCode}: {response.ErrorMessage}");
         }
 
-        Console.WriteLine($"Treasury API Response: {response.Content?.Substring(0, Math.Min(500, response.Content?.Length ?? 0))}...");
+        _logger.LogDebug("Treasury API Response: {ResponsePreview}...", 
+            response.Content?.Substring(0, Math.Min(500, response.Content?.Length ?? 0)));
 
-        Console.WriteLine($"Deserialized Data Count: {response.Data?.Data?.Count ?? 0}");
+        var treasuryResponse = JsonSerializer.Deserialize<TreasuryApiResponse>(response.Content ?? "{}");
+        _logger.LogDebug("Deserialized Data Count: {DataCount}", treasuryResponse?.Data?.Count ?? 0);
 
-        return response.Data ?? new TreasuryApiResponse();
+        return treasuryResponse ?? new TreasuryApiResponse();
     }
 
     /// <inheritdoc />

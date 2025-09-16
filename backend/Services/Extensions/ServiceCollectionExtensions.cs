@@ -40,6 +40,9 @@ public static class ServiceCollectionExtensions
             return new RestClient(clientOptions);
         });
 
+        // Register RestClient wrapper
+        services.AddScoped<IRestClientWrapper, RestClientWrapper>();
+
         // Register the client service
         services.AddScoped<ITreasuryExchangeRateClient, TreasuryExchangeRateClient>();
 
@@ -77,6 +80,9 @@ public static class ServiceCollectionExtensions
 
             return new RestClient(clientOptions);
         });
+
+        // Register RestClient wrapper
+        services.AddScoped<IRestClientWrapper, RestClientWrapper>();
 
         // Register the client service
         services.AddScoped<ITreasuryExchangeRateClient, TreasuryExchangeRateClient>();
