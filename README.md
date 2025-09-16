@@ -4,6 +4,18 @@ A comprehensive transaction management system with API backend, database integra
 
 ![2025-09-16 11 59 39](https://github.com/user-attachments/assets/c98eaef2-9b31-4139-a480-626c77d3241a)
 
+## 📑 Table of Contents
+
+- [🏗️ Project Structure](#%EF%B8%8F-project-structure)
+- [⚡ Quick Start](#-quick-start)
+- [🔧 Dependencies](#-dependencies)
+- [✨ Features](#-features)
+- [🧪 Running Tests](#-running-tests)
+- [📋 Requirements Implementation](#-requirements-implementation)
+- [📚 Documentation](#-documentation)
+- [🔧 Development](#-development)
+- [🚀 Future Improvements](#-future-improvements)
+
 
 ## 🏗️ Project Structure
 
