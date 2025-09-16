@@ -167,6 +167,9 @@ Test coverage includes:
 - Exchange rate service testing
 - API client retry logic testing
 
+<img width="615" height="688" alt="image" src="https://github.com/user-attachments/assets/812ba007-aca6-47c2-aabe-a683f1bac1dc" />
+
+
 ## 📋 Requirements Implementation
 
 This solution addresses the requirements specified in the **WEX TAG and Gateways Product Brief**:
