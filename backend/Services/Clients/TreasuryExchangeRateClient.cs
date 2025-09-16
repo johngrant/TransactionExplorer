@@ -22,14 +22,14 @@ public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
     private const string Endpoint = "v1/accounting/od/rates_of_exchange";
 
     public TreasuryExchangeRateClient(
-        IRestClientWrapper restClientWrapper, 
+        IRestClientWrapper restClientWrapper,
         IOptions<TreasuryExchangeRateOptions> options,
         ILogger<TreasuryExchangeRateClient> logger)
     {
         _restClientWrapper = restClientWrapper ?? throw new ArgumentNullException(nameof(restClientWrapper));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
+
         // Configure retry policy
         _retryPipeline = new ResiliencePipelineBuilder<IRestResponseWrapper>()
             .AddRetry(new Polly.Retry.RetryStrategyOptions<IRestResponseWrapper>
@@ -37,8 +37,8 @@ public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
                 ShouldHandle = new PredicateBuilder<IRestResponseWrapper>()
                     .Handle<HttpRequestException>()
                     .Handle<TaskCanceledException>()
-                    .HandleResult(response => 
-                        !response.IsSuccessful && 
+                    .HandleResult(response =>
+                        !response.IsSuccessful &&
                         response.StatusCode != HttpStatusCode.NotFound && // Don't retry 404s
                         response.StatusCode != HttpStatusCode.BadRequest), // Don't retry bad requests
                 MaxRetryAttempts = 3,
@@ -46,8 +46,8 @@ public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
                 UseJitter = true,
                 OnRetry = args =>
                 {
-                    _logger.LogWarning("Treasury API retry attempt {AttemptNumber} after {Delay}ms. Outcome: {Outcome}", 
-                        args.AttemptNumber, 
+                    _logger.LogWarning("Treasury API retry attempt {AttemptNumber} after {Delay}ms. Outcome: {Outcome}",
+                        args.AttemptNumber,
                         args.RetryDelay.TotalMilliseconds,
                         args.Outcome);
                     return ValueTask.CompletedTask;
@@ -98,12 +98,12 @@ public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
 
         if (!response.IsSuccessful)
         {
-            _logger.LogError("Treasury API request failed with status {StatusCode}: {ErrorMessage}", 
+            _logger.LogError("Treasury API request failed with status {StatusCode}: {ErrorMessage}",
                 response.StatusCode, response.ErrorMessage);
             throw new HttpRequestException($"Request failed with status {response.StatusCode}: {response.ErrorMessage}");
         }
 
-        _logger.LogDebug("Treasury API Response: {ResponsePreview}...", 
+        _logger.LogDebug("Treasury API Response: {ResponsePreview}...",
             response.Content?.Substring(0, Math.Min(500, response.Content?.Length ?? 0)));
 
         var treasuryResponse = JsonSerializer.Deserialize<TreasuryApiResponse>(response.Content ?? "{}");

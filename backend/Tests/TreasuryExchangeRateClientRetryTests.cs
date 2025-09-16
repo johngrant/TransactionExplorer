@@ -39,12 +39,12 @@ public class TreasuryExchangeRateClientRetryTests
     public async Task GetExchangeRatesAsync_WithPollyRetry_RetriesOnServerError()
     {
         // Arrange
-        var failedResponse = Mock.Of<IRestResponseWrapper>(r => 
+        var failedResponse = Mock.Of<IRestResponseWrapper>(r =>
             r.StatusCode == HttpStatusCode.InternalServerError &&
             r.IsSuccessful == false &&
             r.ErrorMessage == "Server error");
 
-        var successResponse = Mock.Of<IRestResponseWrapper>(r => 
+        var successResponse = Mock.Of<IRestResponseWrapper>(r =>
             r.StatusCode == HttpStatusCode.OK &&
             r.IsSuccessful == true &&
             r.Content == "{\"data\":[]}");
@@ -65,7 +65,7 @@ public class TreasuryExchangeRateClientRetryTests
     public async Task GetExchangeRatesAsync_Returns404_DoesNotRetry()
     {
         // Arrange
-        var notFoundResponse = Mock.Of<IRestResponseWrapper>(r => 
+        var notFoundResponse = Mock.Of<IRestResponseWrapper>(r =>
             r.StatusCode == HttpStatusCode.NotFound &&
             r.IsSuccessful == false);
 
@@ -85,12 +85,12 @@ public class TreasuryExchangeRateClientRetryTests
     public async Task GetExchangeRatesAsync_RetriesOnTimeout()
     {
         // Arrange
-        var timeoutResponse = Mock.Of<IRestResponseWrapper>(r => 
+        var timeoutResponse = Mock.Of<IRestResponseWrapper>(r =>
             r.StatusCode == HttpStatusCode.RequestTimeout &&
             r.IsSuccessful == false &&
             r.ErrorMessage == "Request timeout");
 
-        var successResponse = Mock.Of<IRestResponseWrapper>(r => 
+        var successResponse = Mock.Of<IRestResponseWrapper>(r =>
             r.StatusCode == HttpStatusCode.OK &&
             r.IsSuccessful == true &&
             r.Content == "{\"data\":[{\"record_date\":\"2024-01-01\",\"exchange_rate\":\"1.25\"}]}");
@@ -113,7 +113,7 @@ public class TreasuryExchangeRateClientRetryTests
     public async Task GetExchangeRatesAsync_BadRequest_DoesNotRetry()
     {
         // Arrange
-        var badRequestResponse = Mock.Of<IRestResponseWrapper>(r => 
+        var badRequestResponse = Mock.Of<IRestResponseWrapper>(r =>
             r.StatusCode == HttpStatusCode.BadRequest &&
             r.IsSuccessful == false &&
             r.ErrorMessage == "Bad request");
