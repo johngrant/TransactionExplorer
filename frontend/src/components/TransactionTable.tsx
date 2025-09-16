@@ -1,8 +1,8 @@
 import { Loader2, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Transaction } from "../services/api";
 import { formatTransactionDate } from "../utils/dateUtils";
-import { TransactionDetailsPopup } from "./TransactionDetailsPopup";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -19,52 +19,44 @@ interface TransactionTableProps {
 
 export function TransactionTable({ transactions, loading = false, hasMore = false, onRefresh, onTransactionDeleted }: TransactionTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("transactionDate");
+  const [sortField, setSortField] = useState<"date" | "amount" | "id" | "description">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const navigate = useNavigate();
 
+  // Filter and sort transactions
   const filteredAndSortedTransactions = transactions
     .filter(transaction =>
       transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.customId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.id.toString().includes(searchTerm)
+      transaction.customId.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
+      let aValue: any;
+      let bValue: any;
 
-      switch (sortBy) {
-        case "transactionDate":
-          aValue = new Date(a.transactionDate).getTime();
-          bValue = new Date(b.transactionDate).getTime();
+      switch (sortField) {
+        case "date":
+          aValue = new Date(a.transactionDate);
+          bValue = new Date(b.transactionDate);
           break;
-        case "purchaseAmount":
+        case "amount":
           aValue = a.purchaseAmount;
           bValue = b.purchaseAmount;
+          break;
+        case "id":
+          aValue = a.customId;
+          bValue = b.customId;
           break;
         case "description":
           aValue = a.description.toLowerCase();
           bValue = b.description.toLowerCase();
           break;
-        case "customId":
-          aValue = a.customId.toLowerCase();
-          bValue = b.customId.toLowerCase();
-          break;
-        case "id":
-          aValue = a.id;
-          bValue = b.id;
-          break;
         default:
-          aValue = new Date(a.transactionDate).getTime();
-          bValue = new Date(b.transactionDate).getTime();
+          return 0;
       }
 
-      if (sortOrder === "asc") {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      }
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
     });
 
   const toggleSortOrder = () => {
@@ -72,17 +64,7 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
   };
 
   const handleRowClick = (transaction: Transaction) => {
-    setSelectedTransactionId(transaction.id);
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-    setSelectedTransactionId(null);
-  };
-
-  const handleTransactionDeleted = (transactionId: number) => {
-    onTransactionDeleted?.(transactionId);
+    navigate(`/transaction/${transaction.id}`);
   };
 
   return (
@@ -114,24 +96,22 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
             />
           </div>
           <div className="flex gap-2">
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select value={sortField} onValueChange={(value) => setSortField(value as "date" | "amount" | "id" | "description")}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Sort by">
                   <span>Sort: {
-                    sortBy === "transactionDate" ? "Date" :
-                      sortBy === "purchaseAmount" ? "Amount" :
-                        sortBy === "description" ? "Description" :
-                          sortBy === "customId" ? "Custom ID" :
-                            sortBy === "id" ? "ID" : "Date"
+                    sortField === "date" ? "Date" :
+                      sortField === "amount" ? "Amount" :
+                        sortField === "description" ? "Description" :
+                          sortField === "id" ? "Custom ID" : "Date"
                   }</span>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="transactionDate">Date</SelectItem>
-                <SelectItem value="purchaseAmount">Amount</SelectItem>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="amount">Amount</SelectItem>
                 <SelectItem value="description">Description</SelectItem>
-                <SelectItem value="customId">Custom ID</SelectItem>
-                <SelectItem value="id">ID</SelectItem>
+                <SelectItem value="id">Custom ID</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={toggleSortOrder}>
@@ -197,14 +177,6 @@ export function TransactionTable({ transactions, loading = false, hasMore = fals
           </Table>
         </div>
       </CardContent>
-
-      {/* Transaction Details Popup */}
-      <TransactionDetailsPopup
-        transactionId={selectedTransactionId}
-        isOpen={isPopupOpen}
-        onClose={handleClosePopup}
-        onDelete={handleTransactionDeleted}
-      />
     </Card>
   );
 }
