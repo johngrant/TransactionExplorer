@@ -6,7 +6,8 @@ A comprehensive transaction management system with API backend, database integra
 
 ## 📑 Table of Contents
 
-- [🏗️ Project Structure](#%EF%B8%8F-project-structure)
+- [� Demo](#-demo)
+- [�🏗️ Project Structure](#%EF%B8%8F-project-structure)
 - [⚡ Quick Start](#-quick-start)
 - [🔧 Dependencies](#-dependencies)
 - [✨ Features](#-features)
@@ -17,7 +18,11 @@ A comprehensive transaction management system with API backend, database integra
 - [🚀 Future Improvements](#-future-improvements)
 
 
-## 🏗️ Project Structure
+## � Demo
+
+<div style="position: relative; padding-bottom: 62.42774566473989%; height: 0;"><iframe src="https://www.loom.com/embed/1b9594d0dde54cd088ec5867d0bd6d97?sid=8c35e73e-fe2f-4c1c-b7f1-87ab2c57eeb3" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+
+## �🏗️ Project Structure
 
 ```
 transaction-explorer/
