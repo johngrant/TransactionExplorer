@@ -1,4 +1,7 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
+using RestSharp;
+using Services.Configuration;
 using Services.Interfaces;
 using Services.Models;
 
@@ -9,31 +12,14 @@ namespace Services.Clients;
 /// </summary>
 public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
 {
-    private readonly HttpClient _httpClient;
-    private readonly JsonSerializerOptions _jsonOptions;
-    private const string BaseUrl = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service";
-    private const string Endpoint = "/v1/accounting/od/rates_of_exchange";
+    private readonly RestClient _restClient;
+    private readonly TreasuryExchangeRateOptions _options;
+    private const string Endpoint = "v1/accounting/od/rates_of_exchange";
 
-    public TreasuryExchangeRateClient(HttpClient httpClient)
+    public TreasuryExchangeRateClient(RestClient restClient, IOptions<TreasuryExchangeRateOptions> options)
     {
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-
-        // Configure JSON options for case-insensitive property matching
-        _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-
-        // Set up base URL if not already configured
-        if (_httpClient.BaseAddress == null)
-        {
-            _httpClient.BaseAddress = new Uri(BaseUrl);
-        }
-
-        // Set common headers
-        _httpClient.DefaultRequestHeaders.Accept.Clear();
-        _httpClient.DefaultRequestHeaders.Accept.Add(
-            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+        _restClient = restClient ?? throw new ArgumentNullException(nameof(restClient));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
     /// <inheritdoc />
@@ -45,30 +31,43 @@ public class TreasuryExchangeRateClient : ITreasuryExchangeRateClient
         int pageSize = 100,
         CancellationToken cancellationToken = default)
     {
-        var queryParams = new List<string>();
+        var request = new RestRequest(Endpoint, Method.Get);
 
         if (!string.IsNullOrEmpty(fields))
-            queryParams.Add($"fields={Uri.EscapeDataString(fields)}");
+            request.AddQueryParameter("fields", fields);
 
         if (!string.IsNullOrEmpty(filter))
-            queryParams.Add($"filter={Uri.EscapeDataString(filter)}");
+            request.AddQueryParameter("filter", filter);
 
         if (!string.IsNullOrEmpty(sort))
-            queryParams.Add($"sort={Uri.EscapeDataString(sort)}");
+            request.AddQueryParameter("sort", sort);
 
-        queryParams.Add($"page[number]={pageNumber}");
-        queryParams.Add($"page[size]={pageSize}");
+        request.AddQueryParameter("page[number]", pageNumber.ToString());
+        request.AddQueryParameter("page[size]", pageSize.ToString());
 
-        var queryString = string.Join("&", queryParams);
-        var url = $"{Endpoint}?{queryString}";
+        Console.WriteLine($"Treasury API Request: {_restClient.Options.BaseUrl}/{request.Resource}");
 
-        var response = await _httpClient.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var response = await _restClient.ExecuteAsync<TreasuryApiResponse>(request, cancellationToken);
 
-        var jsonContent = await response.Content.ReadAsStringAsync(cancellationToken);
-        var result = JsonSerializer.Deserialize<TreasuryApiResponse>(jsonContent, _jsonOptions);
+        Console.WriteLine($"Response Status: {response.StatusCode}");
 
-        return result ?? new TreasuryApiResponse();
+        // Handle 404 as empty result rather than throwing exception
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            Console.WriteLine("Returning empty response due to 404");
+            return new TreasuryApiResponse();
+        }
+
+        if (!response.IsSuccessful)
+        {
+            throw new HttpRequestException($"Request failed with status {response.StatusCode}: {response.ErrorMessage}");
+        }
+
+        Console.WriteLine($"Treasury API Response: {response.Content?.Substring(0, Math.Min(500, response.Content?.Length ?? 0))}...");
+
+        Console.WriteLine($"Deserialized Data Count: {response.Data?.Data?.Count ?? 0}");
+
+        return response.Data ?? new TreasuryApiResponse();
     }
 
     /// <inheritdoc />

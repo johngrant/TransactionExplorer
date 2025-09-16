@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using RestSharp;
 using Services.Clients;
 using Services.Configuration;
 using Services.Interfaces;
@@ -25,23 +26,22 @@ public static class ServiceCollectionExtensions
         services.Configure<TreasuryExchangeRateOptions>(
             configuration.GetSection(TreasuryExchangeRateOptions.SectionName));
 
-        // Register HttpClient for TreasuryExchangeRateClient
-        services.AddHttpClient<ITreasuryExchangeRateClient, TreasuryExchangeRateClient>((serviceProvider, httpClient) =>
+        // Register RestClient as a singleton with proper configuration
+        services.AddSingleton<RestClient>(serviceProvider =>
         {
             var options = configuration.GetSection(TreasuryExchangeRateOptions.SectionName)
                                     .Get<TreasuryExchangeRateOptions>() ?? new TreasuryExchangeRateOptions();
 
-            httpClient.BaseAddress = new Uri(options.BaseUrl);
-            httpClient.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+            var clientOptions = new RestClientOptions(options.BaseUrl)
+            {
+                Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds)
+            };
 
-            // Set user agent
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TransactionExplorer/1.0");
-
-            // Set default headers
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Accept.Add(
-                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            return new RestClient(clientOptions);
         });
+
+        // Register the client service
+        services.AddScoped<ITreasuryExchangeRateClient, TreasuryExchangeRateClient>();
 
         return services;
     }
@@ -67,20 +67,19 @@ public static class ServiceCollectionExtensions
             opt.MaxRetries = options.MaxRetries;
         });
 
-        // Register HttpClient for TreasuryExchangeRateClient
-        services.AddHttpClient<ITreasuryExchangeRateClient, TreasuryExchangeRateClient>((serviceProvider, httpClient) =>
+        // Register RestClient as a singleton with proper configuration
+        services.AddSingleton<RestClient>(serviceProvider =>
         {
-            httpClient.BaseAddress = new Uri(options.BaseUrl);
-            httpClient.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+            var clientOptions = new RestClientOptions(options.BaseUrl)
+            {
+                Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds)
+            };
 
-            // Set user agent
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TransactionExplorer/1.0");
-
-            // Set default headers
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Accept.Add(
-                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            return new RestClient(clientOptions);
         });
+
+        // Register the client service
+        services.AddScoped<ITreasuryExchangeRateClient, TreasuryExchangeRateClient>();
 
         return services;
     }

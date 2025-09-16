@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5070/api";
+const API_BASE_URL = "https://localhost:7237/api";
 
 export interface Transaction {
   id: number;
@@ -23,6 +23,16 @@ export interface PagedResponse<T> {
 export interface PaginationParameters {
   pageNumber: number;
   pageSize: number;
+}
+
+export interface CurrencyConversionResponse {
+  originalAmountUsd: number;
+  transactionDate: string;
+  exchangeRate: number;
+  convertedAmount: number;
+  targetCurrency: string;
+  exchangeRateDate: string;
+  isExactDateMatch: boolean;
 }
 
 export class ApiService {
@@ -98,5 +108,43 @@ export class ApiService {
     if (!response.ok) {
       throw new Error(`Failed to delete transaction: ${response.statusText}`);
     }
+  }
+
+  static async convertCurrency(
+    transactionDate: string,
+    amountUsd: number,
+    countryCurrencyDesc: string
+  ): Promise<CurrencyConversionResponse> {
+    const url = new URL(`${API_BASE_URL}/exchangerate/convert`);
+    url.searchParams.append("transactionDate", transactionDate);
+    url.searchParams.append("amountUsd", amountUsd.toString());
+    url.searchParams.append("countryCurrencyDesc", countryCurrencyDesc);
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error("Exchange Rate Not Found");
+      }
+
+      // Handle server errors that might contain the "exchange rate not found" message
+      if (response.status === 500) {
+        try {
+          const errorText = await response.text();
+          if (
+            errorText.toLowerCase().includes("no exchange rate found") ||
+            errorText.toLowerCase().includes("exchange rate not found")
+          ) {
+            throw new Error("Exchange Rate Not Found");
+          }
+        } catch {
+          // If we can't parse the error, fall through to the generic error
+        }
+      }
+
+      throw new Error(`Failed to convert currency: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 }

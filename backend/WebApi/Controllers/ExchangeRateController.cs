@@ -30,7 +30,7 @@ public class ExchangeRateController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
         {
-            throw new ArgumentException("Currency description cannot be null or empty", nameof(countryCurrencyDesc));
+            return BadRequest("Currency description cannot be null or empty");
         }
 
         // Calculate the date range: 6 months before the transaction date up to the transaction date
@@ -72,7 +72,7 @@ public class ExchangeRateController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
         {
-            throw new ArgumentException("Currency description cannot be null or empty", nameof(countryCurrencyDesc));
+            return BadRequest("Currency description cannot be null or empty");
         }
 
         try
@@ -112,12 +112,12 @@ public class ExchangeRateController : ControllerBase
     {
         if (amountUsd <= 0)
         {
-            throw new ArgumentException("Amount must be a positive value", nameof(amountUsd));
+            return BadRequest("Amount must be a positive value");
         }
 
         if (string.IsNullOrWhiteSpace(countryCurrencyDesc))
         {
-            throw new ArgumentException("Currency description cannot be null or empty", nameof(countryCurrencyDesc));
+            return BadRequest("Currency description cannot be null or empty");
         }
 
         try

@@ -8,159 +8,244 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { Separator } from "../components/ui/separator";
-import { ApiService, Transaction } from "../services/api";
+import { ApiService, CurrencyConversionResponse, Transaction } from "../services/api";
 import { formatDateTime, formatTransactionDateDetailed } from "../utils/dateUtils";
 
-// Sample currencies based on Treasury Reporting Rates of Exchange data
+// Updated currencies based on Treasury Reporting Rates of Exchange data
 const CURRENCIES = [
-    { code: "AFN", name: "Afghanistan-Afghani", rate: 70.13 },
-    { code: "ALL", name: "Albania-Lek", rate: 83.22 },
-    { code: "DZD", name: "Algeria-Dinar", rate: 129.335 },
-    { code: "AOA", name: "Angola-Kwanza", rate: 911.955 },
-    { code: "XCD", name: "Antigua & Barbuda-East Caribbean Dollar", rate: 2.7 },
-    { code: "ARS", name: "Argentina-Peso", rate: 1205.0 },
-    { code: "AMD", name: "Armenia-Dram", rate: 390.0 },
-    { code: "AUD", name: "Australia-Dollar", rate: 1.531 },
-    { code: "AZN", name: "Azerbaijan-Manat", rate: 1.7 },
-    { code: "BSD", name: "Bahamas-Dollar", rate: 1.0 },
-    { code: "BHD", name: "Bahrain-Dinar", rate: 0.377 },
-    { code: "BDT", name: "Bangladesh-Taka", rate: 123.0 },
-    { code: "BBD", name: "Barbados-Dollar", rate: 2.02 },
-    { code: "BZD", name: "Belize-Dollar", rate: 2.0 },
-    { code: "XOF", name: "Benin-Cfa Franc", rate: 556.5 },
-    { code: "BMD", name: "Bermuda-Dollar", rate: 1.0 },
-    { code: "BOB", name: "Bolivia-Boliviano", rate: 6.85 },
-    { code: "BAM", name: "Bosnia-Marka", rate: 1.668 },
-    { code: "BWP", name: "Botswana-Pula", rate: 13.245 },
-    { code: "BRL", name: "Brazil-Real", rate: 5.478 },
-    { code: "BND", name: "Brunei-Dollar", rate: 1.274 },
-    { code: "BGN", name: "Bulgaria-Lev New", rate: 1.668 },
-    { code: "XOF", name: "Burkina Faso-Cfa Franc", rate: 556.5 },
-    { code: "BIF", name: "Burundi-Franc", rate: 2900.0 },
-    { code: "KHR", name: "Cambodia-Riel", rate: 3998.5 },
-    { code: "XAF", name: "Cameroon-Cfa Franc", rate: 559.36 },
-    { code: "CAD", name: "Canada-Dollar", rate: 1.367 },
-    { code: "CVE", name: "Cape Verde-Escudo", rate: 94.03 },
-    { code: "KYD", name: "Cayman Islands-Dollar", rate: 0.82 },
-    { code: "XAF", name: "Central African Republic-Cfa Franc", rate: 559.36 },
-    { code: "XAF", name: "Chad-Cfa Franc", rate: 559.36 },
-    { code: "CLP", name: "Chile-Peso", rate: 892.19 },
-    { code: "CNY", name: "China-Yuan Renminbi", rate: 7.125 },
-    { code: "COP", name: "Colombia-Peso", rate: 4158.0 },
-    { code: "KMF", name: "Comoros-Franc", rate: 419.0 },
-    { code: "CRC", name: "Costa Rica-Colon", rate: 528.76 },
-    { code: "HRK", name: "Croatia-Kuna", rate: 6.43 },
-    { code: "CUC", name: "Cuba-Peso Convertible", rate: 1.0 },
-    { code: "CZK", name: "Czech Republic-Koruna", rate: 21.16 },
-    { code: "DKK", name: "Denmark-Krone", rate: 6.362 },
-    { code: "DJF", name: "Djibouti-Franc", rate: 177.0 },
-    { code: "DOP", name: "Dominican Republic-Peso", rate: 59.11 },
-    { code: "USD", name: "Ecuador-Dolares", rate: 1.0 },
-    { code: "EGP", name: "Egypt-Pound", rate: 49.49 },
-    { code: "EUR", name: "Euro Zone-Euro", rate: 0.853 },
-    { code: "FJD", name: "Fiji-Dollar", rate: 2.213 },
-    { code: "XAF", name: "Gabon-Cfa Franc", rate: 559.36 },
-    { code: "GMD", name: "Gambia-Dalasi", rate: 72.0 },
-    { code: "GEL", name: "Georgia-Lari", rate: 2.692 },
-    { code: "GHS", name: "Ghana-Cedi", rate: 10.3 },
-    { code: "GTQ", name: "Guatemala-Quetzal", rate: 7.68 },
-    { code: "GNF", name: "Guinea-Franc", rate: 8631.0 },
-    { code: "GYD", name: "Guyana-Dollar", rate: 209.0 },
-    { code: "HTG", name: "Haiti-Gourde", rate: 132.0 },
-    { code: "HNL", name: "Honduras-Lempira", rate: 24.74 },
-    { code: "HUF", name: "Hungary-Forint", rate: 344.01 },
-    { code: "ISK", name: "Iceland-Krona", rate: 137.8 },
-    { code: "INR", name: "India-Rupee", rate: 83.17 },
-    { code: "IDR", name: "Indonesia-Rupiah", rate: 15810.0 },
-    { code: "IRR", name: "Iran-Rial", rate: 42000.0 },
-    { code: "IQD", name: "Iraq-Dinar", rate: 1309.0 },
-    { code: "ILS", name: "Israel-Shekel", rate: 3.369 },
-    { code: "JMD", name: "Jamaica-Dollar", rate: 159.0 },
-    { code: "JPY", name: "Japan-Yen", rate: 155.2 },
-    { code: "JOD", name: "Jordan-Dinar", rate: 0.709 },
-    { code: "KZT", name: "Kazakhstan-Tenge", rate: 461.0 },
-    { code: "KES", name: "Kenya-Shilling", rate: 152.0 },
-    { code: "KWD", name: "Kuwait-Dinar", rate: 0.306 },
-    { code: "KGS", name: "Kyrgyzstan-Som", rate: 85.4 },
-    { code: "LAK", name: "Laos-Kip", rate: 21000.0 },
-    { code: "LBP", name: "Lebanon-Pound", rate: 15000.0 },
-    { code: "LSL", name: "Lesotho-Loti", rate: 17.757 },
-    { code: "LRD", name: "Liberia-Dollar", rate: 191.0 },
-    { code: "LYD", name: "Libya-Dinar", rate: 4.79 },
-    { code: "MOP", name: "Macau-Pataca", rate: 8.06 },
-    { code: "MKD", name: "Republic Of North Macedonia-Denar", rate: 52.25 },
-    { code: "MGA", name: "Madagascar-Ariary", rate: 4540.0 },
-    { code: "MWK", name: "Malawi-Kwacha", rate: 1785.0 },
-    { code: "MYR", name: "Malaysia-Ringgit", rate: 4.41 },
-    { code: "MVR", name: "Maldives-Rufiyaa", rate: 15.42 },
-    { code: "XOF", name: "Mali-Cfa Franc", rate: 556.5 },
-    { code: "MRU", name: "Mauritania-Ouguiya", rate: 39.9 },
-    { code: "MUR", name: "Mauritius-Rupee", rate: 46.32 },
-    { code: "MXN", name: "Mexico-Peso", rate: 17.79 },
-    { code: "MDL", name: "Moldova-Leu", rate: 17.81 },
-    { code: "MNT", name: "Mongolia-Tugrik", rate: 3408.0 },
-    { code: "MAD", name: "Morocco-Dirham", rate: 9.62 },
-    { code: "MZN", name: "Mozambique-New Metical", rate: 63.86 },
-    { code: "MMK", name: "Myanmar-Kyat", rate: 2098.0 },
-    { code: "NAD", name: "Namibia-Dollar", rate: 17.757 },
-    { code: "NPR", name: "Nepal-Rupee", rate: 133.0 },
-    { code: "ANG", name: "Netherlands Antilles-Guilder", rate: 1.79 },
-    { code: "NZD", name: "New Zealand-Dollar", rate: 1.639 },
-    { code: "NIO", name: "Nicaragua-Cordoba Oro", rate: 36.78 },
-    { code: "XOF", name: "Niger-Cfa Franc", rate: 556.5 },
-    { code: "NGN", name: "Nigeria-Naira", rate: 1535.0 },
-    { code: "NOK", name: "Norway-Krone", rate: 10.535 },
-    { code: "OMR", name: "Oman-Rial", rate: 0.385 },
-    { code: "PKR", name: "Pakistan-Rupee", rate: 278.7 },
-    { code: "PAB", name: "Panama-Balboa", rate: 1.0 },
-    { code: "PGK", name: "Papua New Guinea-Kina", rate: 3.95 },
-    { code: "PYG", name: "Paraguay-Guarani", rate: 7350.0 },
-    { code: "PEN", name: "Peru-Sol", rate: 3.549 },
-    { code: "PHP", name: "Philippines-Peso", rate: 56.443 },
-    { code: "PLN", name: "Poland-Zloty", rate: 3.617 },
-    { code: "QAR", name: "Qatar-Riyal", rate: 3.641 },
-    { code: "RON", name: "Romania-New Leu", rate: 4.327 },
-    { code: "RUB", name: "Russia-Ruble", rate: 78.4 },
-    { code: "RWF", name: "Rwanda-Franc", rate: 1435.0 },
-    { code: "STN", name: "Sao Tome & Principe-New Dobras", rate: 20.892 },
-    { code: "SAR", name: "Saudi Arabia-Riyal", rate: 3.75 },
-    { code: "XOF", name: "Senegal-Cfa Franc", rate: 556.5 },
-    { code: "RSD", name: "Serbia-Dinar", rate: 99.77 },
-    { code: "SCR", name: "Seychelles-Rupee", rate: 14.16 },
-    { code: "SLE", name: "Sierra Leone-New Leone", rate: 22700.0 },
-    { code: "SGD", name: "Singapore-Dollar", rate: 1.274 },
-    { code: "SBD", name: "Solomon Islands-Dollar", rate: 8.49 },
-    { code: "SOS", name: "Somali-Shilling", rate: 568.0 },
-    { code: "ZAR", name: "South Africa-Rand", rate: 17.757 },
-    { code: "SSP", name: "South Sudan-Sudanese Pound", rate: 4600.0 },
-    { code: "LKR", name: "Sri Lanka-Rupee", rate: 299.95 },
-    { code: "SRD", name: "Suriname-Dollar", rate: 35.26 },
-    { code: "SZL", name: "Eswatini-Lilangeni", rate: 17.757 },
-    { code: "SEK", name: "Sweden-Krona", rate: 10.315 },
-    { code: "CHF", name: "Switzerland-Franc", rate: 0.842 },
-    { code: "SYP", name: "Syria-Pound", rate: 13000.0 },
-    { code: "TWD", name: "Taiwan-New Dollar", rate: 31.73 },
-    { code: "TJS", name: "Tajikistan-Somoni", rate: 10.6 },
-    { code: "TZS", name: "Tanzania-Shilling", rate: 2568.5 },
-    { code: "THB", name: "Thailand-Baht", rate: 34.2 },
-    { code: "XOF", name: "Togo-Cfa Franc", rate: 556.5 },
-    { code: "TOP", name: "Tonga-Pa'anga", rate: 2.306 },
-    { code: "TTD", name: "Trinidad & Tobago-Dollar", rate: 6.78 },
-    { code: "TND", name: "Tunisia-Dinar", rate: 3.08 },
-    { code: "TRY", name: "Turkey-Lira", rate: 34.33 },
-    { code: "TMT", name: "Turkmenistan-New Manat", rate: 3.51 },
-    { code: "UGX", name: "Uganda-Shilling", rate: 3652.0 },
-    { code: "UAH", name: "Ukraine-Hryvnia", rate: 40.97 },
-    { code: "AED", name: "United Arab Emirates-Dirham", rate: 3.672 },
-    { code: "GBP", name: "United Kingdom-Pound", rate: 0.73 },
-    { code: "UYU", name: "Uruguay-Peso", rate: 40.19 },
-    { code: "UZS", name: "Uzbekistan-Som", rate: 12631.5 },
-    { code: "VUV", name: "Vanuatu-Vatu", rate: 117.0 },
-    { code: "VED", name: "Venezuela-Bolivar Soberano", rate: 3600000.0 },
-    { code: "VND", name: "Vietnam-Dong", rate: 24680.0 },
-    { code: "YER", name: "Yemen-Rial", rate: 250.0 },
-    { code: "ZMW", name: "Zambia-Kwacha", rate: 27.2 },
-    { code: "ZWL", name: "Zimbabwe-Dollar", rate: 322.0 }
+    { code: "AFN", name: "Afghanistan-Afghani" },
+    { code: "ALL", name: "Albania-Lek" },
+    { code: "DZD", name: "Algeria-Dinar" },
+    { code: "AOA", name: "Angola-Kwanza" },
+    { code: "XCD", name: "Antigua & Barbuda-East Caribbean Dollar" },
+    { code: "ARS", name: "Argentina-Peso" },
+    { code: "AMD", name: "Armenia-Dram" },
+    { code: "AUD", name: "Australia-Dollar" },
+    { code: "EUR", name: "Austria-Euro" },
+    { code: "AZN", name: "Azerbaijan-Manat" },
+    { code: "AZM", name: "Azerbaijan-New Manat" },
+    { code: "BSD", name: "Bahamas-Dollar" },
+    { code: "BHD", name: "Bahrain-Dinar" },
+    { code: "BDT", name: "Bangladesh-Taka" },
+    { code: "BBD", name: "Barbados-Dollar" },
+    { code: "BYN", name: "Belarus-New Ruble" },
+    { code: "BYR", name: "Belarus-Ruble" },
+    { code: "EUR", name: "Belgium-Euro" },
+    { code: "BZD", name: "Belize-Dollar" },
+    { code: "XOF", name: "Benin-Cfa Franc" },
+    { code: "BMD", name: "Bermuda-Dollar" },
+    { code: "BOB", name: "Bolivia-Boliviano" },
+    { code: "BAM", name: "Bosnia Hercegovina-Marka" },
+    { code: "BAM", name: "Bosnia-Marka" },
+    { code: "BWP", name: "Botswana-Pula" },
+    { code: "BRL", name: "Brazil-Real" },
+    { code: "BND", name: "Brunei-Dollar" },
+    { code: "BGN", name: "Bulgaria-Lev" },
+    { code: "BGN", name: "Bulgaria-Lev New" },
+    { code: "XOF", name: "Burkina Faso-Cfa Franc" },
+    { code: "MMK", name: "Burma Myanmar-Kyat" },
+    { code: "MMK", name: "Burma-Kyat" },
+    { code: "BIF", name: "Burundi-Franc" },
+    { code: "KHR", name: "Cambodia (Khmer)-Riel" },
+    { code: "KHR", name: "Cambodia-Riel" },
+    { code: "XAF", name: "Cameroon-Cfa Franc" },
+    { code: "CAD", name: "Canada-Dollar" },
+    { code: "CVE", name: "Cape Verde-Escudo" },
+    { code: "KYD", name: "Cayman Islands-Dollar" },
+    { code: "XAF", name: "Central African Republic-Cfa Franc" },
+    { code: "XAF", name: "Chad-Cfa Franc" },
+    { code: "CLP", name: "Chile-Peso" },
+    { code: "CNY", name: "China-Renminbi" },
+    { code: "COP", name: "Colombia-Peso" },
+    { code: "KMF", name: "Comoros-Franc" },
+    { code: "XAF", name: "Congo-Cfa Franc" },
+    { code: "CRC", name: "Costa Rica-Colon" },
+    { code: "XOF", name: "Cote D'Ivoire-Cfa Franc" },
+    { code: "EUR", name: "Croatia-Euro" },
+    { code: "HRK", name: "Croatia-Kuna" },
+    { code: "EUR", name: "Cross Border-Euro" },
+    { code: "CUC", name: "Cuba-Chavito" },
+    { code: "CUP", name: "Cuba-Peso" },
+    { code: "ANG", name: "Curacao-Caribbean Guilder" },
+    { code: "EUR", name: "Cyprus-Euro" },
+    { code: "CZK", name: "Czech Republic-Koruna" },
+    { code: "CDF", name: "Democratic Republic Of Congo-Congolese Franc" },
+    { code: "CDF", name: "Democratic Republic Of Congo-Franc" },
+    { code: "DKK", name: "Denmark-Krone" },
+    { code: "DJF", name: "Djibouti-Franc" },
+    { code: "DOP", name: "Dominican Republic-Peso" },
+    { code: "USD", name: "Ecuador-Dolares" },
+    { code: "EGP", name: "Egypt-Pound" },
+    { code: "USD", name: "El Salvador-Dolares" },
+    { code: "USD", name: "El Salvador-Dollar" },
+    { code: "XAF", name: "Equatorial Guinea-Cfa Franc" },
+    { code: "ERN", name: "Eritrea-Nakfa" },
+    { code: "ERN", name: "Eritrea-Nakfa Salary Payment" },
+    { code: "EUR", name: "Estonia-Euro" },
+    { code: "SZL", name: "Eswatini-Lilangeni" },
+    { code: "ETB", name: "Ethiopia-Birr" },
+    { code: "EUR", name: "Euro Zone-Euro" },
+    { code: "FJD", name: "Fiji-Dollar" },
+    { code: "EUR", name: "Finland-Euro" },
+    { code: "EUR", name: "France-Euro" },
+    { code: "XAF", name: "Gabon-Cfa Franc" },
+    { code: "GMD", name: "Gambia-Dalasi" },
+    { code: "GEL", name: "Georgia-Lari" },
+    { code: "EUR", name: "Germany Frg-Euro" },
+    { code: "EUR", name: "Germany-Euro" },
+    { code: "GHS", name: "Ghana-Cedi" },
+    { code: "EUR", name: "Greece-Euro" },
+    { code: "XCD", name: "Grenada-East Caribbean Dollar" },
+    { code: "GTQ", name: "Guatemala-Quetzal" },
+    { code: "XOF", name: "Guinea Bissau-Cfa Franc" },
+    { code: "GNF", name: "Guinea-Franc" },
+    { code: "GYD", name: "Guyana-Dollar" },
+    { code: "HTG", name: "Haiti-Gourde" },
+    { code: "HNL", name: "Honduras-Lempira" },
+    { code: "HKD", name: "Hong Kong-Dollar" },
+    { code: "HUF", name: "Hungary-Forint" },
+    { code: "ISK", name: "Iceland-Krona" },
+    { code: "INR", name: "India-Rupee" },
+    { code: "IDR", name: "Indonesia-Rupiah" },
+    { code: "IRR", name: "Iran-Rial" },
+    { code: "IQD", name: "Iraq-Dinar" },
+    { code: "EUR", name: "Ireland-Euro" },
+    { code: "ILS", name: "Israel-Shekel" },
+    { code: "EUR", name: "Italy-Euro" },
+    { code: "JMD", name: "Jamaica-Dollar" },
+    { code: "JPY", name: "Japan-Yen" },
+    { code: "ILS", name: "Jerusalem-Shekel" },
+    { code: "JOD", name: "Jordan-Dinar" },
+    { code: "KZT", name: "Kazakhstan-Tenge" },
+    { code: "KES", name: "Kenya-Shilling" },
+    { code: "KRW", name: "Korea-Won" },
+    { code: "EUR", name: "Kosovo-Euro" },
+    { code: "KWD", name: "Kuwait-Dinar" },
+    { code: "KGS", name: "Kyrgyzstan-Som" },
+    { code: "LAK", name: "Laos-Kip" },
+    { code: "EUR", name: "Latvia-Euro" },
+    { code: "LBP", name: "Lebanon-Pound" },
+    { code: "LSL", name: "Lesotho-Maloti" },
+    { code: "ZAR", name: "Lesotho-South African Rand" },
+    { code: "LRD", name: "Liberia-Dollar" },
+    { code: "USD", name: "Liberia-U.S. Dollar" },
+    { code: "LYD", name: "Libya-Dinar" },
+    { code: "EUR", name: "Lithuania-Euro" },
+    { code: "EUR", name: "Luxembourg-Euro" },
+    { code: "MOP", name: "Macao-Mop" },
+    { code: "MKD", name: "Macedonia Fyrom-Denar (Ariary)" },
+    { code: "MGA", name: "Madagascar-Ariary" },
+    { code: "MGA", name: "Madagascar-Franc" },
+    { code: "MWK", name: "Malawi-Kwacha" },
+    { code: "MYR", name: "Malaysia-Ringgit" },
+    { code: "MVR", name: "Maldives-Rufiyaa" },
+    { code: "XOF", name: "Mali-Cfa Franc" },
+    { code: "EUR", name: "Malta-Euro" },
+    { code: "USD", name: "Marshall Islands-Dollar" },
+    { code: "USD", name: "Marshall Islands-U.S. Dollar" },
+    { code: "EUR", name: "Martinique-Euro" },
+    { code: "MRU", name: "Mauritania-Ouguiya" },
+    { code: "MUR", name: "Mauritius-Rupee" },
+    { code: "MXN", name: "Mexico-New Peso" },
+    { code: "MXN", name: "Mexico-Peso" },
+    { code: "USD", name: "Micronesia-Dollar" },
+    { code: "USD", name: "Micronesia-U.S. Dollar" },
+    { code: "MDL", name: "Moldova-Leu" },
+    { code: "MNT", name: "Mongolia-Tugrik" },
+    { code: "EUR", name: "Montenegro-Euro" },
+    { code: "MAD", name: "Morocco-Dirham" },
+    { code: "MZN", name: "Mozambique-Metical" },
+    { code: "MMK", name: "Myanmar-Kyat" },
+    { code: "NAD", name: "Namibia-Dollar" },
+    { code: "NPR", name: "Nepal-Rupee" },
+    { code: "ANG", name: "Netherlands Antilles-Guilder" },
+    { code: "EUR", name: "Netherlands-Euro" },
+    { code: "NZD", name: "New Zealand-Dollar" },
+    { code: "NIO", name: "Nicaragua-Cordoba" },
+    { code: "XOF", name: "Niger-Cfa Franc" },
+    { code: "NGN", name: "Nigeria-Naira" },
+    { code: "NOK", name: "Norway-Krone" },
+    { code: "OMR", name: "Oman-Rial" },
+    { code: "PKR", name: "Pakistan-Rupee" },
+    { code: "USD", name: "Palau-Dollar" },
+    { code: "PAB", name: "Panama-Balboa" },
+    { code: "USD", name: "Panama-Dolares" },
+    { code: "PGK", name: "Papua New Guinea-Kina" },
+    { code: "PYG", name: "Paraguay-Guarani" },
+    { code: "PEN", name: "Peru-Nuevo Sol" },
+    { code: "PEN", name: "Peru-Sol" },
+    { code: "PHP", name: "Philippines-Peso" },
+    { code: "PLN", name: "Poland-Zloty" },
+    { code: "EUR", name: "Portugal-Euro" },
+    { code: "QAR", name: "Qatar-Riyal" },
+    { code: "MKD", name: "Republic Of North Macedonia-Denar" },
+    { code: "USD", name: "Republic Of Palau-Dollar" },
+    { code: "RON", name: "Romania-Leu" },
+    { code: "RON", name: "Romania-New Leu" },
+    { code: "RUB", name: "Russia-Ruble" },
+    { code: "RWF", name: "Rwanda-Franc" },
+    { code: "STD", name: "Sao Tome & Principe-Dobras" },
+    { code: "STN", name: "Sao Tome & Principe-New Dobras" },
+    { code: "SAR", name: "Saudi Arabia-Riyal" },
+    { code: "XOF", name: "Senegal-Cfa Franc" },
+    { code: "RSD", name: "Serbia-Dinar" },
+    { code: "EUR", name: "Serbia-Euro Dinar" },
+    { code: "SCR", name: "Seychelles-Rupee" },
+    { code: "SLL", name: "Sierra Leone-Leone" },
+    { code: "SLE", name: "Sierra Leone-Old Leone" },
+    { code: "SGD", name: "Singapore-Dollar" },
+    { code: "EUR", name: "Slovak Republic-Euro" },
+    { code: "EUR", name: "Slovakia-Euro" },
+    { code: "EUR", name: "Slovenia-Euro" },
+    { code: "SBD", name: "Solomon Islands-Dollar" },
+    { code: "SOS", name: "Somali-Shilling" },
+    { code: "ZAR", name: "South Africa-Rand" },
+    { code: "SSP", name: "South Sudan-Sudanese Pound" },
+    { code: "EUR", name: "Spain-Euro" },
+    { code: "LKR", name: "Sri Lanka-Rupee" },
+    { code: "XCD", name: "St. Lucia-East Caribbean Dollar" },
+    { code: "SDG", name: "Sudan-Pound" },
+    { code: "SDG", name: "Sudan-Sudanese Pound" },
+    { code: "SRD", name: "Suriname-Dollar" },
+    { code: "SRG", name: "Suriname-Guilder" },
+    { code: "SZL", name: "Swaziland-Lilangeni" },
+    { code: "SEK", name: "Sweden-Krona" },
+    { code: "CHF", name: "Switzerland-Franc" },
+    { code: "SYP", name: "Syria-Pound" },
+    { code: "TWD", name: "Taiwan-Dollar" },
+    { code: "TJS", name: "Tajikistan-Somoni" },
+    { code: "TZS", name: "Tanzania-Shilling" },
+    { code: "THB", name: "Thailand-Baht" },
+    { code: "USD", name: "Timor-Leste Dili" },
+    { code: "USD", name: "Timor-Leste-Dili" },
+    { code: "XOF", name: "Togo-Cfa Franc" },
+    { code: "TOP", name: "Tonga-Pa'Anga" },
+    { code: "TTD", name: "Trinidad & Tobago-Dollar" },
+    { code: "TND", name: "Tunisia-Dinar" },
+    { code: "TRY", name: "Turkey-Lira" },
+    { code: "TRY", name: "Turkey-New Lira" },
+    { code: "TMT", name: "Turkmenistan-Manat" },
+    { code: "TMT", name: "Turkmenistan-New Manat" },
+    { code: "UGX", name: "Uganda-Shilling" },
+    { code: "UAH", name: "Ukraine-Hryvnia" },
+    { code: "AED", name: "United Arab Emirates-Dirham" },
+    { code: "GBP", name: "United Kingdom-Pound" },
+    { code: "GBP", name: "United Kingdom-Pound Sterling" },
+    { code: "UYU", name: "Uruguay-Peso" },
+    { code: "UZS", name: "Uzbekistan-Som" },
+    { code: "VUV", name: "Vanuatu-Vatu" },
+    { code: "VED", name: "Venezuela-Bolivar" },
+    { code: "VEF", name: "Venezuela-Bolivar Fuerte" },
+    { code: "VED", name: "Venezuela-Bolivar Soberano" },
+    { code: "VEF", name: "Venezuela-Fuerte" },
+    { code: "VND", name: "Vietnam-Dong" },
+    { code: "WST", name: "Western Samoa-Tala" },
+    { code: "YER", name: "Yemen-Rial" },
+    { code: "ZMW", name: "Zambia-Kwacha" },
+    { code: "ZMK", name: "Zambia-New Kwacha" },
+    { code: "ZWL", name: "Zimbabwe-Dollar" },
+    { code: "XAU", name: "Zimbabwe-Gold" },
+    { code: "ZWL", name: "Zimbabwe-Rtgs" },
 ];
 
 export function TransactionDetailsPage() {
@@ -172,6 +257,9 @@ export function TransactionDetailsPage() {
     const [error, setError] = useState<string | null>(null);
     const [selectedCurrency, setSelectedCurrency] = useState<string>("");
     const [open, setOpen] = useState(false);
+    const [conversionData, setConversionData] = useState<CurrencyConversionResponse | null>(null);
+    const [convertingCurrency, setConvertingCurrency] = useState(false);
+    const [conversionError, setConversionError] = useState<string | null>(null);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
 
     // Load transaction details when component mounts
@@ -180,6 +268,16 @@ export function TransactionDetailsPage() {
             loadTransaction(parseInt(id));
         }
     }, [id]);
+
+    // Convert currency when selectedCurrency changes
+    useEffect(() => {
+        if (selectedCurrency && transaction) {
+            convertCurrency();
+        } else {
+            setConversionData(null);
+            setConversionError(null);
+        }
+    }, [selectedCurrency, transaction]);
 
     const loadTransaction = async (transactionId: number) => {
         setLoading(true);
@@ -211,6 +309,30 @@ export function TransactionDetailsPage() {
 
     const handleGoBack = () => {
         navigate('/');
+    };
+
+    const convertCurrency = async () => {
+        if (!transaction || !selectedCurrency) return;
+
+        setConvertingCurrency(true);
+        setConversionError(null);
+
+        try {
+            // selectedCurrency now stores the currency name directly
+            const conversionResult = await ApiService.convertCurrency(
+                transaction.transactionDate.split('T')[0], // Convert to YYYY-MM-DD format
+                transaction.purchaseAmount,
+                selectedCurrency // Use the currency name directly
+            );
+
+            setConversionData(conversionResult);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Failed to convert currency";
+            setConversionError(errorMessage);
+            setConversionData(null);
+        } finally {
+            setConvertingCurrency(false);
+        }
     };
 
     if (loading) {
@@ -360,8 +482,10 @@ export function TransactionDetailsPage() {
                                                 className="w-full justify-between"
                                             >
                                                 {selectedCurrency
-                                                    ? CURRENCIES.find((currency) => currency.code === selectedCurrency)?.name +
-                                                    ` (${CURRENCIES.find((currency) => currency.code === selectedCurrency)?.code})`
+                                                    ? (() => {
+                                                        const currency = CURRENCIES.find((currency) => currency.name === selectedCurrency);
+                                                        return currency ? `${currency.name} (${currency.code})` : selectedCurrency;
+                                                    })()
                                                     : "Select currency..."
                                                 }
                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -379,17 +503,17 @@ export function TransactionDetailsPage() {
                                                 <CommandList className="max-h-[200px]">
                                                     <CommandEmpty>No currency found.</CommandEmpty>
                                                     <CommandGroup>
-                                                        {CURRENCIES.map((currency) => (
+                                                        {CURRENCIES.map((currency, index) => (
                                                             <CommandItem
-                                                                key={`${currency.code}-${currency.name.replace(/\s/g, '')}`}
+                                                                key={`${currency.name}-${index}`}
                                                                 value={`${currency.code} ${currency.name}`}
                                                                 onSelect={() => {
-                                                                    setSelectedCurrency(currency.code === selectedCurrency ? "" : currency.code);
+                                                                    setSelectedCurrency(currency.name === selectedCurrency ? "" : currency.name);
                                                                     setOpen(false);
                                                                 }}
                                                             >
                                                                 <Check
-                                                                    className={`mr-2 h-4 w-4 ${selectedCurrency === currency.code ? "opacity-100" : "opacity-0"
+                                                                    className={`mr-2 h-4 w-4 ${selectedCurrency === currency.name ? "opacity-100" : "opacity-0"
                                                                         }`}
                                                                 />
                                                                 <div className="flex items-center justify-between w-full">
@@ -411,24 +535,57 @@ export function TransactionDetailsPage() {
 
                                 {selectedCurrency && (
                                     <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-muted-foreground">Exchange Rate (USD → {selectedCurrency}):</span>
-                                            <span className="font-mono">
-                                                {CURRENCIES.find(c => c.code === selectedCurrency)?.rate?.toFixed(4)}
-                                            </span>
-                                        </div>
-                                        <Separator />
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-medium text-sm text-muted-foreground">Converted Amount:</span>
-                                            <div className="text-right">
-                                                <div className="text-lg font-bold text-green-600">
-                                                    {((transaction.purchaseAmount * (CURRENCIES.find(c => c.code === selectedCurrency)?.rate || 1))).toFixed(2)}
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    {CURRENCIES.find(c => c.code === selectedCurrency)?.code}
-                                                </div>
+                                        {convertingCurrency && (
+                                            <div className="flex items-center justify-center py-4">
+                                                <LoadingSpinner text="Converting currency..." />
                                             </div>
-                                        </div>
+                                        )}
+
+                                        {conversionError && (
+                                            <div className="text-center py-4">
+                                                <p className="text-red-600 text-sm font-medium">
+                                                    {conversionError}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {conversionData && !convertingCurrency && !conversionError && (
+                                            <>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-muted-foreground">Exchange Rate (USD → {(() => {
+                                                        const currency = CURRENCIES.find(c => c.name === selectedCurrency);
+                                                        return currency ? currency.code : selectedCurrency;
+                                                    })()}):</span>
+                                                    <span className="font-mono">
+                                                        {conversionData.exchangeRate.toFixed(4)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-muted-foreground">Rate Date:</span>
+                                                    <span className="font-mono text-xs">
+                                                        {conversionData.exchangeRateDate}
+                                                        {!conversionData.isExactDateMatch && (
+                                                            <span className="text-yellow-600 ml-1">(approx)</span>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <Separator />
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-medium text-sm text-muted-foreground">Converted Amount:</span>
+                                                    <div className="text-right">
+                                                        <div className="text-lg font-bold text-green-600">
+                                                            {conversionData.convertedAmount.toFixed(2)}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {(() => {
+                                                                const currency = CURRENCIES.find(c => c.name === selectedCurrency);
+                                                                return currency ? currency.code : selectedCurrency;
+                                                            })()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </div>
