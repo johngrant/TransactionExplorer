@@ -37,6 +37,8 @@ transaction-explorer/
 ├── frontend/               # React frontend application
 │   ├── src/                # React components and utilities
 │   ├── build/              # Production build output
+│   ├── docker-compose.yml  # Frontend Docker deployment
+│   ├── Dockerfile          # Frontend containerization
 │   └── package.json        # Node.js dependencies
 └── docs/                   # Project documentation
 ```
@@ -45,14 +47,12 @@ transaction-explorer/
 
 ### Prerequisites
 - **Docker Desktop**: Required for containerized services
-- **Node.js** (v18+): For frontend development
 - **.NET 9.0 SDK**: For backend development (optional if using Docker)
+- **Node.js** (v18+): For frontend development (optional if using Docker)
 
 ### Full System (Recommended)
 ```bash
-./up.sh     # Start entire system (database + backend)
-cd frontend
-./start.sh
+./up.sh     # Start entire system (database + backend + frontend)
 ```
 
 ### Individual Services
@@ -79,16 +79,23 @@ cd database
 #### Frontend Only
 ```bash
 cd frontend
+./up.sh     # Start containerized frontend
+./down.sh   # Stop frontend
+```
+- Frontend: http://localhost:3000
+
+**For Development:**
+```bash
+cd frontend
 npm install
 npm run dev
 ```
-- Frontend: http://localhost:3000
 
 ## 🔧 Dependencies
 
 ### Dockerization
 This solution leverages **Docker Desktop** for consistent development and deployment environments:
-- All services can run in Docker containers
+- All services run in Docker containers (database, backend, and frontend)
 - Docker Compose orchestrates multi-service deployments
 - Database persistence through Docker volumes
 - Cross-platform compatibility (Windows, macOS, Linux)
@@ -231,7 +238,7 @@ This solution addresses the requirements specified in the **WEX TAG and Gateways
 
 ## 📚 Documentation
 
-- **Backend Deployment**: [`backend/DEPLOYMENT.md`](backend/DEPLOYMENT.md)
+- **Frontend Deployment**: [`frontend/DEPLOYMENT.md`](frontend/DEPLOYMENT.md)
 - **Database Setup**: [`database/README.md`](database/README.md)
 - **API Documentation**: [U.S. Treasury Fiscal Data](docs/API%20Documentation%20_%20U.S.%20Treasury%20Fiscal%20Data.md)
 - **Product Requirements**: [WEX TAG and Gateways Product Brief](docs/WEX%20TAG%20and%20Gateways%20Product%20Brief.md)
@@ -241,13 +248,8 @@ This solution addresses the requirements specified in the **WEX TAG and Gateways
 ### Local Development Setup
 1. **Clone the repository**
 2. **Start Docker Desktop**
-3. **Run the backend system**: `./up.sh` (starts database + backend API)
-4. **Start the frontend** (not containerized yet):
-   ```bash
-   cd frontend
-   ./start.sh
-   ```
-5. **Access the application**:
+3. **Run the full system**: `./up.sh` (starts database + backend API + frontend)
+4. **Access the application**:
    - Frontend: http://localhost:3000
    - API: http://localhost:5070
    - Swagger: http://localhost:5070/swagger
@@ -255,7 +257,7 @@ This solution addresses the requirements specified in the **WEX TAG and Gateways
 
 ### Development Workflow
 - **Backend Changes**: Hot reload enabled with `dotnet watch`
-- **Frontend Changes**: Vite provides instant HMR (Hot Module Replacement)
+- **Frontend Changes**: For development, use `npm run dev` for Vite HMR (Hot Module Replacement)
 - **Database Changes**: Apply migrations with Entity Framework tools
 - **Testing**: Run `dotnet test` after making changes
 
@@ -264,12 +266,12 @@ Each component can be developed and deployed independently:
 - **Full System**: Use root `./up.sh` and `./down.sh` for complete system management
 - **Backend**: Located in `/backend` - .NET Core API with Docker support
 - **Database**: Located in `/database` - SQL Server with initialization scripts
-- **Frontend**: Located in `/frontend` - React application with Vite
+- **Frontend**: Located in `/frontend` - React application with Docker support and Vite for development
 
 For detailed deployment instructions, see the respective documentation files in each directory.
 
 ## 🚀 Future Improvements
 
-- **Containerize the frontend**: Add Docker support for the React frontend to enable full containerization of the entire application stack
 - **Expand frontend test coverage**: Add more comprehensive component tests using Jest and React Testing Library, including edge cases and complex user interactions
 - **Add Cypress for automated browser testing**: Integrate [Cypress](https://www.cypress.io/) for end-to-end testing and automated browser testing to ensure UI functionality across different environments
+- **Add production-ready optimizations**: Implement multi-stage Docker builds, health checks, and monitoring for production deployments
