@@ -8,7 +8,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: build # Use build stage for development
+      target: runtime # Use optimized runtime stage
     container_name: transaction-explorer-api
     ports:
       - "5070:5070" # Match the port from launchSettings.json
@@ -16,21 +16,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5070
       - ConnectionStrings__DefaultConnection=Server=transaction-explorer-db,1433;Database=TransactionExplorer;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=true;
-    volumes:
-      - .:/src # Mount source code for hot reload
     networks:
       - transaction-explorer-network
     restart: unless-stopped
-    command:
-      [
-        "dotnet",
-        "watch",
-        "run",
-        "--project",
-        "WebApi/WebApi.csproj",
-        "--urls",
-        "http://+:5070",
-      ]
+    # Use the optimized runtime image - no need to override command
 
 networks:
   transaction-explorer-network:

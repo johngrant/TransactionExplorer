@@ -72,7 +72,7 @@ fi
 
 # Wait for services to be ready
 print_status "Waiting for services to be ready..."
-sleep 20
+sleep 10
 
 # Check if services are running
 if docker compose -p transaction-explorer ps | grep -q "Up"; then

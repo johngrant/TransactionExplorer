@@ -82,8 +82,6 @@ if (app.Environment.IsDevelopment())
 // Enable CORS
 app.UseCors("AllowAll");
 
-app.UseHttpsRedirection();
-
 // Map controllers
 app.MapControllers();
 
