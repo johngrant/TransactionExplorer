@@ -25,6 +25,9 @@ builder.Services.AddDataServices(builder.Configuration);
 // Add Treasury Exchange Rate Client Services
 builder.Services.AddTreasuryExchangeRateClient(builder.Configuration);
 
+// Add GitHub Client Services
+builder.Services.AddGitHubClient(builder.Configuration);
+
 // Add CORS
 builder.Services.AddCors(options =>
 {
@@ -110,6 +113,10 @@ app.MapGet("/", () =>
         {
             health = "/health",
             transactions = "/api/transactions",
+            github = new
+            {
+                repositories = "/api/github/repositories"
+            },
             exchangeRates = new
             {
                 rates = "/api/exchangerate/rates?transactionDate=YYYY-MM-DD&countryCurrencyDesc=Currency-Description",

@@ -13,6 +13,25 @@ namespace Services.Extensions;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
+    /// Adds GitHub client services to the service collection
+    /// </summary>
+    /// <param name="services">The service collection</param>
+    /// <param name="configuration">Configuration instance</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddGitHubClient(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // Configure options
+        services.Configure<GitHubOptions>(
+            configuration.GetSection(GitHubOptions.SectionName));
+
+        // Register HttpClient for GitHub API
+        services.AddHttpClient<IGitHubClient, GitHubClient>();
+
+        return services;
+    }
+    /// <summary>
     /// Adds Treasury Exchange Rate client services to the service collection
     /// </summary>
     /// <param name="services">The service collection</param>
